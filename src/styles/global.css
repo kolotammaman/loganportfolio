@@ -81,11 +81,11 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 ───────────────────────────────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(28px) scale(0.975) translateZ(0);
-  filter: blur(3px);
-  transition: opacity 920ms var(--ease-out-quint),
-              transform 920ms var(--ease-out-quint),
-              filter 700ms var(--ease-out-quint);
+  transform: translateY(24px) scale(0.988) translateZ(0);
+  filter: blur(1.5px);
+  transition: opacity 880ms var(--ease-out-quint),
+              transform 880ms var(--ease-out-quint),
+              filter 600ms var(--ease-out-quint);
   will-change: opacity, transform, filter;
 }
 .reveal.visible {
@@ -100,17 +100,22 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 .reveal-delay-3 { transition-delay: 180ms; }
 .reveal-delay-4 { transition-delay: 240ms; }
 
-/* ── Mobile: no blur, reduced distance, GPU only ── */
+/* ── Mobile: opacity + translateY only — no scale, no blur, no will-change.
+   Scale forces per-element compositor layers → memory pressure → dropped frames.
+   ease-out is natively optimized by every browser engine.
+   translateZ(0) promotes to GPU at paint time without pre-allocation overhead. ── */
 @media (max-width: 767px) {
   .reveal {
-    transform: translateY(18px) scale(0.985) translateZ(0);
+    opacity: 0;
+    transform: translateY(14px) translateZ(0);
     filter: none;
-    transition: opacity 560ms var(--ease-out-quint),
-                transform 560ms var(--ease-out-quint);
-    will-change: opacity, transform;
+    will-change: auto;
+    transition: opacity 460ms ease-out,
+                transform 460ms ease-out;
   }
   .reveal.visible {
-    transform: translateY(0) scale(1) translateZ(0);
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
     filter: none;
   }
   .reveal-delay-1 { transition-delay: 40ms; }

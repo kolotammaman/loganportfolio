@@ -161,8 +161,8 @@
     </div>
   </div>
 
-  <!-- Scroll indicator — vertical line with bounce animation -->
-  <div class="scroll-indicator absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-text-muted" aria-hidden="true">
+  <!-- Scroll indicator — desktop only; hides on mobile to prevent overlap with stats -->
+  <div class="scroll-indicator hidden md:flex absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-3 text-text-muted" aria-hidden="true">
     <span class="text-xs font-medium tracking-[0.15em] uppercase" style="font-family: var(--font-body);">Scroll</span>
     <div class="w-px h-10 bg-gradient-to-b from-text-muted/50 to-transparent"></div>
   </div>
