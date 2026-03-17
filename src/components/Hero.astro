@@ -10,13 +10,13 @@
     aria-hidden="true"
   ></div>
 
-  <!-- Large decorative circle — top right -->
+  <!-- Large decorative circle — top right, floating independently -->
   <div
-    class="absolute -top-64 -right-64 w-[640px] h-[640px] rounded-full border border-border/60 pointer-events-none"
+    class="hero-float-outer absolute -top-64 -right-64 w-[640px] h-[640px] rounded-full border border-border/60 pointer-events-none"
     aria-hidden="true"
   ></div>
   <div
-    class="absolute -top-48 -right-48 w-[480px] h-[480px] rounded-full border border-border/40 pointer-events-none"
+    class="hero-float-inner absolute -top-48 -right-48 w-[480px] h-[480px] rounded-full border border-border/40 pointer-events-none"
     aria-hidden="true"
   ></div>
 
@@ -105,8 +105,8 @@
 
             function tick(now: number) {
               const progress = Math.min((now - start) / duration, 1);
-              // ease-out-cubic
-              const eased = 1 - Math.pow(1 - progress, 3);
+              // ease-out-quart: faster initial rush, dramatic deceleration into final value
+              const eased = 1 - Math.pow(1 - progress, 4);
               const current = target * eased;
               el.textContent = isDecimal
                 ? current.toFixed(1) + suffix
@@ -155,8 +155,8 @@
     </div>
   </div>
 
-  <!-- Scroll indicator — vertical line -->
-  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-text-muted" aria-hidden="true">
+  <!-- Scroll indicator — vertical line with bounce animation -->
+  <div class="scroll-indicator absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-text-muted" aria-hidden="true">
     <span class="text-xs font-medium tracking-[0.15em] uppercase" style="font-family: var(--font-body);">Scroll</span>
     <div class="w-px h-10 bg-gradient-to-b from-text-muted/50 to-transparent"></div>
   </div>

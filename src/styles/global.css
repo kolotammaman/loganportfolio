@@ -22,9 +22,12 @@
   --font-body: 'Inter', system-ui, sans-serif;
 
   /* ── Animation tokens ── */
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --duration-enter: 600ms;
-  --duration-hover: 220ms;
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-expo:   cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-enter:     800ms;
+  --duration-hover:     300ms;
+  --duration-hover-out: 160ms;
 }
 
 /* ── Base ── */
@@ -40,15 +43,18 @@ body { overflow-x: hidden; }
 /* ── Scroll-triggered entrance animations ── */
 .reveal {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(36px);
+  filter: blur(4px);
   transition: opacity var(--duration-enter) var(--ease-out-expo),
-              transform var(--duration-enter) var(--ease-out-expo);
+              transform var(--duration-enter) var(--ease-out-expo),
+              filter calc(var(--duration-enter) * 0.75) var(--ease-out-expo);
+  will-change: opacity, transform, filter;
 }
-.reveal.visible        { opacity: 1; transform: translateY(0); }
-.reveal-delay-1        { transition-delay: 100ms; }
-.reveal-delay-2        { transition-delay: 200ms; }
-.reveal-delay-3        { transition-delay: 300ms; }
-.reveal-delay-4        { transition-delay: 400ms; }
+.reveal.visible        { opacity: 1; transform: translateY(0); filter: blur(0); }
+.reveal-delay-1        { transition-delay: 120ms; }
+.reveal-delay-2        { transition-delay: 240ms; }
+.reveal-delay-3        { transition-delay: 360ms; }
+.reveal-delay-4        { transition-delay: 480ms; }
 
 /* ── Gradient text — navy-to-steel ── */
 .gradient-text {
@@ -71,16 +77,19 @@ body { overflow-x: hidden; }
   border: 1px solid var(--color-border);
 }
 
-/* ── Hover lift ── */
+/* ── Hover lift — spring enter, fast ease-in exit ── */
 .card-hover {
-  transition: transform var(--duration-hover) var(--ease-out-expo),
-              box-shadow var(--duration-hover) var(--ease-out-expo),
-              border-color var(--duration-hover) ease;
+  transition: transform var(--duration-hover-out) var(--ease-in-expo),
+              box-shadow var(--duration-hover-out) var(--ease-in-expo),
+              border-color var(--duration-hover-out) ease;
 }
 .card-hover:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(28, 53, 87, 0.07);
+  transform: translateY(-7px) scale(1.012);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.13), 0 0 0 1px rgba(28, 53, 87, 0.10);
   border-color: var(--color-border-hover);
+  transition: transform var(--duration-hover) var(--ease-spring),
+              box-shadow var(--duration-hover) var(--ease-out-expo),
+              border-color var(--duration-hover) ease;
 }
 
 /* ── Nav scrolled state ── */
@@ -97,18 +106,48 @@ body { overflow-x: hidden; }
   color: var(--color-accent);
 }
 
-/* ── About highlight cards — directional slide on hover ── */
+/* ── About highlight cards — spring slide on hover, fast exit ── */
 .highlight-card {
-  transition: transform var(--duration-hover) var(--ease-out-expo),
-              border-color var(--duration-hover) ease;
+  transition: transform var(--duration-hover-out) var(--ease-in-expo),
+              border-color var(--duration-hover-out) ease;
 }
 .highlight-card:hover {
-  transform: translateX(5px);
+  transform: translateX(10px);
   border-color: var(--color-accent);
+  transition: transform var(--duration-hover) var(--ease-spring),
+              border-color var(--duration-hover) ease;
 }
 
 /* ── Stat counter — number starts invisible, JS triggers ── */
 [data-counter] { will-change: contents; }
+
+/* ── Hero decorative circles — slow independent float ── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes float-slow-reverse {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(10px); }
+}
+.hero-float-outer {
+  animation: float-slow 10s ease-in-out infinite;
+  will-change: transform;
+}
+.hero-float-inner {
+  animation: float-slow-reverse 13s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── Scroll indicator — gentle vertical bounce ── */
+@keyframes scroll-nudge {
+  0%, 100% { opacity: 0.45; transform: translateY(0); }
+  50%       { opacity: 0.85; transform: translateY(5px); }
+}
+.scroll-indicator {
+  animation: scroll-nudge 2.4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
@@ -118,6 +157,7 @@ body { overflow-x: hidden; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal { opacity: 1; transform: none; }
+  .reveal { opacity: 1; transform: none; filter: none; }
   .gradient-text { animation: none; }
+  .hero-float-outer, .hero-float-inner, .scroll-indicator { animation: none; }
 }
