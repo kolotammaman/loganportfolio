@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <title>OG Image — Logan Moseley</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: #0D0D0C;
+      color: #F0EDE6;
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .card {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+      padding: 60px 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Dot grid — matches the hero section's texture at same scale */
+    .texture {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #F0EDE6 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.032;
+      pointer-events: none;
+    }
+
+    /* Inset border frame — the site's signature border treatment */
+    .frame {
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(240, 237, 230, 0.07);
+      pointer-events: none;
+    }
+
+    /* ── Top row ── */
+    .top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* LM monogram — mirrors the Penn icon box in Education */
+    .monogram {
+      width: 42px;
+      height: 42px;
+      background: #1C3557;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.14em;
+      flex-shrink: 0;
+    }
+
+    /* Top-right: status indicator */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid rgba(240, 237, 230, 0.12);
+      background: rgba(240, 237, 230, 0.04);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1C3557;
+      flex-shrink: 0;
+    }
+
+    .status-text {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #6A6560;
+    }
+
+    /* ── Name — the dominant moment ── */
+    .name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 118px;
+      font-weight: 700;
+      line-height: 0.88;
+      color: #F0EDE6;
+      letter-spacing: -0.025em;
+      position: relative;
+    }
+
+    /* ── Bottom block ── */
+    .bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    .accent-rule {
+      width: 52px;
+      height: 3px;
+      background: #1C3557;
+    }
+
+    .role {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #8A857E;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .credentials {
+      font-size: 14px;
+      font-weight: 400;
+      color: #4A4540;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    .credentials span {
+      color: #5C5751;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="texture"></div>
+    <div class="frame"></div>
+
+    <!-- Top row: monogram + status pill -->
+    <div class="top">
+      <div class="monogram">LM</div>
+      <div class="status">
+        <div class="status-dot"></div>
+        <span class="status-text">Open to Opportunities</span>
+      </div>
+    </div>
+
+    <!-- Name — the eye-stopper -->
+    <div class="name">
+      Logan<br>Moseley.
+    </div>
+
+    <!-- Bottom: rule, role, credentials -->
+    <div class="bottom">
+      <div class="accent-rule"></div>
+      <div class="role">Project &amp; Program Operations</div>
+      <div class="credentials">
+        University of Pennsylvania
+        <span>&nbsp;&middot;&nbsp;</span>
+        Penn Dental Medicine
+        <span>&nbsp;&middot;&nbsp;</span>
+        CITI Certified
+        <span>&nbsp;&middot;&nbsp;</span>
+        4.0 GPA
+      </div>
+    </div>
+  </div>
+</body>
+</html>
