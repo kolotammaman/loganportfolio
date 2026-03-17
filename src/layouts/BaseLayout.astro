@@ -39,16 +39,22 @@ const { title, description } = Astro.props;
 
     <!-- Scroll reveal observer -->
     <script>
+      // requestAnimationFrame defers class addition to the start of the next
+      // render frame. Without it, classList.add fires mid-scroll-callback which
+      // can land mid-frame on mobile, causing a visible stutter as the browser
+      // recalculates styles during an already-busy scroll frame.
       const observer = new IntersectionObserver(
         (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
+          const visible = entries.filter((e) => e.isIntersecting);
+          if (!visible.length) return;
+          requestAnimationFrame(() => {
+            visible.forEach((entry) => {
               entry.target.classList.add('visible');
               observer.unobserve(entry.target);
-            }
+            });
           });
         },
-        { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+        { threshold: 0.06, rootMargin: '0px 0px -20px 0px' }
       );
       document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
     </script>
