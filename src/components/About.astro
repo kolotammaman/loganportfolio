@@ -28,7 +28,7 @@ const highlights = [
         01 &mdash; About
       </p>
       <h2 id="about-heading" class="font-heading font-bold text-4xl sm:text-5xl text-primary leading-tight">
-        Operations<br><em>is my craft.</em>
+        I run the room before anyone<br><em>notices something's wrong.</em>
       </h2>
     </div>
 
@@ -37,23 +37,17 @@ const highlights = [
       <!-- Left: narrative -->
       <div class="lg:col-span-2 reveal reveal-delay-1 space-y-5">
         <p class="text-text-secondary text-lg leading-relaxed">
-          I'm currently at <span class="font-semibold text-text">Penn Dental Medicine</span> while
-          pursuing my B.A.A.S. in Leadership &amp; Communication at the University of Pennsylvania.
+          I work full-time at <span class="font-semibold text-text">Penn Dental Medicine</span> coordinating clinical operations across multiple specialties — instruments, materials, vendors, schedules — while finishing my B.A.A.S. in Leadership &amp; Communication at Penn.
         </p>
         <p class="text-text-secondary text-lg leading-relaxed">
-          From managing instrument sterilization flows to coordinating multi-clinic logistics,
-          I keep complex systems running smoothly under pressure.
-        </p>
-        <p class="text-text-secondary text-lg leading-relaxed">
-          I thrive where precision, communication, and calm problem-solving are essential&mdash;whether
-          it's a sub-minute handoff during a procedure or standardizing procedures across an entire market.
+          The job moves fast and the margin for error is zero. That environment taught me how to build systems that don't fail, communicate clearly under pressure, and solve problems before anyone has to ask twice.
         </p>
       </div>
 
       <!-- Right: highlights — editorial left-border cards -->
       <div class="lg:col-span-3 grid sm:grid-cols-2 gap-6">
         {highlights.map((item, i) => (
-          <div class={`reveal reveal-delay-${i + 1} border-l-2 border-accent pl-5 py-1`}>
+          <div class={`reveal reveal-delay-${i + 1} highlight-card border-l-2 border-accent pl-5 py-1`}>
             <h3 class="font-heading font-semibold text-lg text-text mb-2">{item.title}</h3>
             <p class="text-text-secondary text-sm leading-relaxed">{item.desc}</p>
           </div>
