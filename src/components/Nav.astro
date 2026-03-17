@@ -1,0 +1,130 @@
+---
+const navLinks = [
+  { href: '#about', label: 'About' },
+  { href: '#experience', label: 'Experience' },
+  { href: '#skills', label: 'Skills' },
+  { href: '#education', label: 'Education' },
+  { href: '#contact', label: 'Contact' },
+];
+---
+
+<nav
+  id="site-nav"
+  class="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
+  aria-label="Main navigation"
+>
+  <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+    <a
+      href="#"
+      class="font-heading font-black text-xl tracking-tight cursor-pointer transition-colors duration-200"
+      aria-label="Logan Moseley - Back to top"
+    >
+      <span class="text-primary">L</span><span class="text-accent">M</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <ul class="hidden md:flex items-center gap-1" role="list">
+      {navLinks.map(({ href, label }) => (
+        <li>
+          <a
+            href={href}
+            class="relative px-4 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer group"
+          >
+            {label}
+            <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-accent rounded-full transition-all duration-200 group-hover:w-5" aria-hidden="true" />
+          </a>
+        </li>
+      ))}
+      <li>
+        <a
+          href="/LoganMoseley_Resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ml-3 px-5 py-2 rounded-full text-sm font-semibold bg-primary text-white hover:bg-accent transition-colors duration-200 cursor-pointer"
+        >
+          Resume
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mobile menu button -->
+    <button
+      id="mobile-menu-btn"
+      class="md:hidden p-2 rounded-lg hover:bg-accent/5 transition-colors duration-200 cursor-pointer"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      aria-label="Open menu"
+    >
+      <svg class="w-6 h-6 text-text" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div
+    id="mobile-menu"
+    class="md:hidden hidden bg-white/95 backdrop-blur-xl border-t border-border"
+    role="menu"
+  >
+    <ul class="px-4 py-3 space-y-1" role="list">
+      {navLinks.map(({ href, label }) => (
+        <li>
+          <a
+            href={href}
+            class="block px-4 py-3 rounded-xl text-base font-medium text-text-secondary hover:text-accent hover:bg-accent/5 transition-colors duration-200 cursor-pointer"
+            role="menuitem"
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+      <li>
+        <a
+          href="/LoganMoseley_Resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block px-4 py-3 rounded-xl text-base font-semibold text-accent cursor-pointer"
+          role="menuitem"
+        >
+          Resume
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<script>
+  // Mobile menu toggle
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const menuIcon = document.getElementById('menu-icon');
+
+  btn?.addEventListener('click', () => {
+    const isOpen = menu?.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', String(isOpen));
+    btn.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+    if (menuIcon) {
+      menuIcon.setAttribute('d', isOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16');
+    }
+  });
+
+  menu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      menu.classList.add('hidden');
+      btn?.setAttribute('aria-expanded', 'false');
+      btn?.setAttribute('aria-label', 'Open menu');
+      if (menuIcon) menuIcon.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+    });
+  });
+
+  // Scroll: add glass bg to nav
+  const nav = document.getElementById('site-nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      nav?.classList.add('bg-white/80', 'backdrop-blur-xl', 'shadow-sm');
+    } else {
+      nav?.classList.remove('bg-white/80', 'backdrop-blur-xl', 'shadow-sm');
+    }
+  }, { passive: true });
+</script>

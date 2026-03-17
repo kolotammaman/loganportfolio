@@ -1,0 +1,96 @@
+---
+---
+
+<section class="relative min-h-screen flex items-center overflow-hidden" aria-label="Introduction">
+  <!-- Ambient gradient blobs -->
+  <div class="blob w-[500px] h-[500px] bg-accent/30 -top-32 -right-32" aria-hidden="true"></div>
+  <div class="blob w-[400px] h-[400px] bg-purple-400/20 bottom-20 -left-40" aria-hidden="true"></div>
+  <div class="blob w-[300px] h-[300px] bg-accent/10 top-1/2 left-1/3" aria-hidden="true"></div>
+
+  <!-- Subtle grid pattern -->
+  <div
+    class="absolute inset-0 opacity-[0.03]"
+    style="background-image: radial-gradient(circle, #18181B 1px, transparent 1px); background-size: 32px 32px;"
+    aria-hidden="true"
+  ></div>
+
+  <div class="relative max-w-6xl mx-auto px-6 py-32 md:py-40">
+    <div class="max-w-3xl">
+      <!-- Pill badge -->
+      <div class="reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-8">
+        <span class="w-2 h-2 rounded-full bg-accent animate-pulse" aria-hidden="true"></span>
+        <span class="text-accent font-medium text-sm tracking-wide">Open to Opportunities</span>
+      </div>
+
+      <!-- Name -->
+      <h1 class="reveal reveal-delay-1 font-heading font-black text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-6">
+        Hi, I'm
+        <span class="gradient-text">Logan Moseley</span>
+      </h1>
+
+      <!-- Tagline -->
+      <p class="reveal reveal-delay-2 font-heading font-semibold text-xl sm:text-2xl text-text-secondary mb-4">
+        Project & Program Operations
+      </p>
+
+      <!-- Summary -->
+      <p class="reveal reveal-delay-2 text-text-secondary text-lg leading-relaxed mb-10 max-w-2xl">
+        Operations-minded coordinator at
+        <span class="font-semibold text-text">Penn Dental Medicine</span>
+        with a calm, service-first approach. Known for
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/10 text-accent font-semibold text-base">&le;15 min</span>
+        critical turnaround and
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-semibold text-base">zero</span>
+        compliance breaches.
+      </p>
+
+      <!-- CTA buttons -->
+      <div class="reveal reveal-delay-3 flex flex-wrap gap-4">
+        <a
+          href="#contact"
+          class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-primary text-white font-semibold text-base hover:bg-accent transition-all duration-300 cursor-pointer shadow-lg shadow-primary/15 hover:shadow-accent/25"
+        >
+          Get in Touch
+          <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+        <a
+          href="/LoganMoseley_Resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-2 border-border text-text font-semibold text-base hover:border-accent hover:text-accent transition-all duration-300 cursor-pointer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Resume
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="reveal reveal-delay-4 mt-20 grid grid-cols-3 gap-6 max-w-lg">
+      <div class="group text-center p-4 rounded-2xl hover:bg-white/60 transition-colors duration-200">
+        <p class="font-heading font-black text-3xl sm:text-4xl text-primary group-hover:text-accent transition-colors duration-200">4+</p>
+        <p class="text-text-muted text-sm mt-1 font-medium">Years Exp.</p>
+      </div>
+      <div class="group text-center p-4 rounded-2xl hover:bg-white/60 transition-colors duration-200">
+        <p class="font-heading font-black text-3xl sm:text-4xl text-primary group-hover:text-accent transition-colors duration-200">4.0</p>
+        <p class="text-text-muted text-sm mt-1 font-medium">GPA at Penn</p>
+      </div>
+      <div class="group text-center p-4 rounded-2xl hover:bg-white/60 transition-colors duration-200">
+        <p class="font-heading font-black text-3xl sm:text-4xl text-primary group-hover:text-accent transition-colors duration-200">0</p>
+        <p class="text-text-muted text-sm mt-1 font-medium">Breaches</p>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-text-muted" aria-hidden="true">
+      <span class="text-xs font-medium tracking-widest uppercase">Scroll</span>
+      <div class="w-5 h-8 rounded-full border-2 border-text-muted/30 flex items-start justify-center p-1">
+        <div class="w-1 h-2 rounded-full bg-text-muted/40 animate-bounce"></div>
+      </div>
+    </div>
+  </div>
+</section>

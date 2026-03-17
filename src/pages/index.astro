@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import Experience from '../components/Experience.astro';
+import Skills from '../components/Skills.astro';
+import Education from '../components/Education.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+---
+
+<BaseLayout
+  title="Logan Moseley — Project & Program Operations"
+  description="Operations-minded program coordinator at Penn with strong interpersonal skills. Specializing in training logistics, healthcare operations, and vendor coordination."
+>
+  <Nav />
+  <main id="main-content">
+    <Hero />
+    <About />
+    <Experience />
+    <Skills />
+    <Education />
+    <Contact />
+  </main>
+  <Footer />
+</BaseLayout>

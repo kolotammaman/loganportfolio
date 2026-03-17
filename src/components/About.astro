@@ -1,0 +1,68 @@
+---
+const highlights = [
+  {
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />',
+    title: 'Fast Execution',
+    desc: '15-minute critical-item turnaround by timing cycles and pre-staging kits',
+  },
+  {
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />',
+    title: 'Zero Breaches',
+    desc: 'Maintained perfect compliance record across all clinic operations',
+  },
+  {
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />',
+    title: 'Team Builder',
+    desc: 'Onboarded new hires and authored SOPs to standardize operations',
+  },
+  {
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />',
+    title: 'Clear Communicator',
+    desc: 'Trusted liaison to residents and faculty under time pressure',
+  },
+];
+---
+
+<section id="about" class="py-24 md:py-32" aria-labelledby="about-heading">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="reveal">
+      <p class="text-accent font-semibold text-sm tracking-widest uppercase mb-3 font-heading">About</p>
+      <h2 id="about-heading" class="font-heading font-black text-3xl sm:text-4xl lg:text-5xl text-text mb-6 tracking-tight">
+        Operations is my craft.
+      </h2>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-12 lg:gap-16 mt-10">
+      <!-- Left: narrative -->
+      <div class="lg:col-span-2 reveal reveal-delay-1">
+        <p class="text-text-secondary text-lg leading-relaxed mb-6">
+          I'm currently at <span class="font-semibold text-text">Penn Dental Medicine</span> while
+          pursuing my B.A.A.S. in Leadership & Communication at the University of Pennsylvania.
+        </p>
+        <p class="text-text-secondary text-lg leading-relaxed mb-6">
+          From managing instrument sterilization flows to coordinating multi-clinic logistics,
+          I keep complex systems running smoothly under pressure.
+        </p>
+        <p class="text-text-secondary text-lg leading-relaxed">
+          I thrive where precision, communication, and calm problem-solving are essential&mdash;whether
+          it's a sub-minute handoff during a procedure or standardizing procedures across an entire market.
+        </p>
+      </div>
+
+      <!-- Right: highlight cards -->
+      <div class="lg:col-span-3 grid sm:grid-cols-2 gap-4">
+        {highlights.map((item, i) => (
+          <div class={`reveal reveal-delay-${i + 1} glass rounded-2xl p-6 card-hover cursor-default`}>
+            <div class="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <Fragment set:html={item.icon} />
+              </svg>
+            </div>
+            <h3 class="font-heading font-bold text-base text-text mb-1.5">{item.title}</h3>
+            <p class="text-text-secondary text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
