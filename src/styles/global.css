@@ -83,13 +83,21 @@ body { overflow-x: hidden; }
               box-shadow var(--duration-hover-out) var(--ease-in-expo),
               border-color var(--duration-hover-out) ease;
 }
-.card-hover:hover {
-  transform: translateY(-7px) scale(1.012);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.13), 0 0 0 1px rgba(28, 53, 87, 0.10);
-  border-color: var(--color-border-hover);
-  transition: transform var(--duration-hover) var(--ease-spring),
-              box-shadow var(--duration-hover) var(--ease-out-expo),
-              border-color var(--duration-hover) ease;
+@media (hover: hover) {
+  .card-hover:hover {
+    transform: translateY(-7px) scale(1.012);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.13), 0 0 0 1px rgba(28, 53, 87, 0.10);
+    border-color: var(--color-border-hover);
+    transition: transform var(--duration-hover) var(--ease-spring),
+                box-shadow var(--duration-hover) var(--ease-out-expo),
+                border-color var(--duration-hover) ease;
+  }
+}
+@media (hover: none) {
+  .card-hover:active {
+    transform: scale(0.98);
+    transition: transform 100ms var(--ease-out-expo);
+  }
 }
 
 /* ── Nav scrolled state ── */
@@ -111,11 +119,13 @@ body { overflow-x: hidden; }
   transition: transform var(--duration-hover-out) var(--ease-in-expo),
               border-color var(--duration-hover-out) ease;
 }
-.highlight-card:hover {
-  transform: translateX(10px);
-  border-color: var(--color-accent);
-  transition: transform var(--duration-hover) var(--ease-spring),
-              border-color var(--duration-hover) ease;
+@media (hover: hover) {
+  .highlight-card:hover {
+    transform: translateX(10px);
+    border-color: var(--color-accent);
+    transition: transform var(--duration-hover) var(--ease-spring),
+                border-color var(--duration-hover) ease;
+  }
 }
 
 /* ── Stat counter — number starts invisible, JS triggers ── */
