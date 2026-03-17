@@ -52,14 +52,14 @@
           — where precision matters and nothing can wait.
         </p>
 
-        <!-- CTA buttons — architectural (no border-radius) -->
+        <!-- CTA buttons — architectural sweep on hover -->
         <div class="reveal reveal-delay-3 flex flex-wrap gap-3 mb-20">
           <a
             href="#contact"
-            class="group inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white text-sm font-semibold tracking-wide hover:bg-accent active:scale-95 transition-all duration-300 cursor-pointer"
+            class="btn-primary group inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white text-sm font-semibold tracking-wide cursor-pointer"
           >
             Get in Touch
-            <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </a>
@@ -67,9 +67,9 @@
             href="/LoganMoseley_Resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-7 py-3.5 border border-border text-text-secondary text-sm font-semibold tracking-wide hover:border-primary hover:text-primary active:scale-95 transition-all duration-300 cursor-pointer"
+            class="btn-secondary group inline-flex items-center gap-2 px-7 py-3.5 border border-border text-text-secondary text-sm font-semibold tracking-wide cursor-pointer"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="w-4 h-4 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Resume
@@ -143,12 +143,18 @@
             class="absolute inset-0 translate-x-3 translate-y-3 rounded-2xl border border-accent/30 pointer-events-none"
             aria-hidden="true"
           ></div>
-          <img
-            src="/profile.jpg"
-            alt="Logan Moseley"
-            class="relative w-full h-full object-cover object-top rounded-2xl border border-border/60"
-            style="box-shadow: 0 8px 40px rgba(0,0,0,0.45); filter: contrast(1.05) saturate(0.9);"
-          />
+          <!-- Profile photo — overflow-hidden clips the hover zoom to border-radius -->
+          <div
+            class="profile-img-wrap absolute inset-0 rounded-2xl border border-border/60"
+            style="box-shadow: 0 8px 40px rgba(0,0,0,0.45);"
+          >
+            <img
+              src="/profile.jpg"
+              alt="Logan Moseley"
+              class="w-full h-full object-cover object-top"
+              style="filter: contrast(1.05) saturate(0.9);"
+            />
+          </div>
         </div>
       </div>
 

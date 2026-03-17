@@ -38,9 +38,9 @@ const skillCategories = [
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border">
       {skillCategories.map((category, i) => (
-        <div class={`reveal reveal-delay-${i + 1} bg-bg-card p-7 group hover:bg-accent-soft transition-colors duration-300 cursor-default`}>
+        <div class={`reveal reveal-delay-${i + 1} bg-bg-card p-7 group hover:bg-accent-soft cursor-default`} style="transition: background-color 320ms cubic-bezier(0.22, 1, 0.36, 1);">
           <!-- Icon -->
-          <div class="w-10 h-10 flex items-center justify-center border border-border group-hover:border-accent/30 mb-5 transition-colors duration-300">
+          <div class="skill-icon w-10 h-10 flex items-center justify-center border border-border group-hover:border-accent/30 mb-5">
             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <Fragment set:html={category.icon} />
             </svg>

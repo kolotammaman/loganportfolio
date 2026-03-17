@@ -25,20 +25,43 @@
   --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-expo:   cubic-bezier(0.7, 0, 0.84, 0);
   --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-enter:     800ms;
-  --duration-hover:     300ms;
-  --duration-hover-out: 160ms;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);   /* Very long tail — silky large moves */
+  --ease-standard:  cubic-bezier(0.2, 0, 0, 1);        /* Material 3 standard */
+  --duration-enter:     920ms;
+  --duration-hover:     280ms;
+  --duration-hover-out: 140ms;
 }
 
 /* ── Base ── */
 html { scroll-behavior: smooth; }
 body { overflow-x: hidden; }
 
-/* ── Tap delay removal — eliminates 300ms delay on touch devices ── */
+/* ── Branded text selection ── */
+::selection {
+  background-color: rgba(28, 53, 87, 0.13);
+  color: var(--color-text);
+}
+
+/* ── Heading typography polish ── */
+h1, h2, h3, h4, h5, h6 {
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* ── Tap delay removal ── */
 a, button { touch-action: manipulation; }
 
 /* ── Scroll offset — compensate for fixed nav height ── */
 section[id] { scroll-margin-top: 5rem; }
+
+/* ── Nav — smooth state transition (overrides Tailwind transition-all) ── */
+#site-nav {
+  transition: background 380ms var(--ease-out-quint),
+              border-color 380ms var(--ease-out-quint),
+              box-shadow 380ms var(--ease-out-quint),
+              backdrop-filter 380ms var(--ease-out-quint),
+              -webkit-backdrop-filter 380ms var(--ease-out-quint);
+}
 
 /* ── Nav scroll-spy active link ── */
 a.nav-link-active { color: var(--color-primary); font-weight: 500; }
@@ -50,42 +73,60 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
   border-radius: 3px;
 }
 
-/* ── Scroll-triggered entrance animations ── */
+/* ─────────────────────────────────────────────
+   SCROLL-TRIGGERED ENTRANCE
+   Initial state: slightly below, very slightly
+   smaller, lightly blurred — "breathes" in.
+   Uses ease-out-quint for a silky long tail.
+───────────────────────────────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(36px) translateZ(0);
-  filter: blur(4px);
-  transition: opacity var(--duration-enter) var(--ease-out-expo),
-              transform var(--duration-enter) var(--ease-out-expo),
-              filter calc(var(--duration-enter) * 0.75) var(--ease-out-expo);
+  transform: translateY(28px) scale(0.975) translateZ(0);
+  filter: blur(3px);
+  transition: opacity 920ms var(--ease-out-quint),
+              transform 920ms var(--ease-out-quint),
+              filter 700ms var(--ease-out-quint);
   will-change: opacity, transform, filter;
 }
-.reveal.visible        { opacity: 1; transform: translateY(0) translateZ(0); filter: blur(0); }
-.reveal-delay-1        { transition-delay: 120ms; }
-.reveal-delay-2        { transition-delay: 240ms; }
-.reveal-delay-3        { transition-delay: 360ms; }
-.reveal-delay-4        { transition-delay: 480ms; }
-
-/* ── Mobile: skip blur (expensive on mobile GPUs) and shorten motion ── */
-@media (max-width: 767px) {
-  .reveal {
-    transform: translateY(18px) translateZ(0);
-    filter: none;
-    transition: opacity 580ms var(--ease-out-expo),
-                transform 580ms var(--ease-out-expo);
-    will-change: opacity, transform;
-  }
-  .reveal.visible { transform: translateY(0) translateZ(0); filter: none; }
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1) translateZ(0);
+  filter: blur(0);
 }
 
-/* ── Gradient text — navy-to-steel ── */
+/* Tighter stagger — feels cohesive, not mechanical */
+.reveal-delay-1 { transition-delay: 60ms; }
+.reveal-delay-2 { transition-delay: 120ms; }
+.reveal-delay-3 { transition-delay: 180ms; }
+.reveal-delay-4 { transition-delay: 240ms; }
+
+/* ── Mobile: no blur, reduced distance, GPU only ── */
+@media (max-width: 767px) {
+  .reveal {
+    transform: translateY(18px) scale(0.985) translateZ(0);
+    filter: none;
+    transition: opacity 560ms var(--ease-out-quint),
+                transform 560ms var(--ease-out-quint);
+    will-change: opacity, transform;
+  }
+  .reveal.visible {
+    transform: translateY(0) scale(1) translateZ(0);
+    filter: none;
+  }
+  .reveal-delay-1 { transition-delay: 40ms; }
+  .reveal-delay-2 { transition-delay: 80ms; }
+  .reveal-delay-3 { transition-delay: 120ms; }
+  .reveal-delay-4 { transition-delay: 160ms; }
+}
+
+/* ── Gradient text — navy-to-steel shimmer ── */
 .gradient-text {
   background: linear-gradient(135deg, #1C3557 0%, #2D6FA6 50%, #1C3557 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradient-shift 8s ease-in-out infinite;
+  animation: gradient-shift 9s ease-in-out infinite;
 }
 
 @keyframes gradient-shift {
@@ -93,13 +134,18 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
   50%       { background-position: 100% 50%; }
 }
 
-/* ── Card — clean editorial (replaces glassmorphism) ── */
+/* ── Card — clean editorial ── */
 .glass {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
 }
 
-/* ── Hover lift — spring enter, fast ease-in exit ── */
+/* ─────────────────────────────────────────────
+   CARD HOVER
+   Enter: quint — smooth, long tail, restrained.
+   Exit: in-expo — snaps away cleanly.
+   Lift reduced to 4px — more elegant restraint.
+───────────────────────────────────────────── */
 .card-hover {
   transition: transform var(--duration-hover-out) var(--ease-in-expo),
               box-shadow var(--duration-hover-out) var(--ease-in-expo),
@@ -107,84 +153,201 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 }
 @media (hover: hover) {
   .card-hover:hover {
-    transform: translateY(-7px) scale(1.012);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.13), 0 0 0 1px rgba(28, 53, 87, 0.10);
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.09), 0 0 0 1px rgba(28, 53, 87, 0.07);
     border-color: var(--color-border-hover);
-    transition: transform var(--duration-hover) var(--ease-spring),
-                box-shadow var(--duration-hover) var(--ease-out-expo),
-                border-color var(--duration-hover) ease;
+    transition: transform 320ms var(--ease-out-quint),
+                box-shadow 320ms var(--ease-out-quint),
+                border-color 200ms ease;
   }
 }
 @media (hover: none) {
+  .card-hover {
+    transition: transform 160ms ease-out, box-shadow 160ms ease-out, border-color 160ms ease;
+  }
   .card-hover:active {
     transform: scale(0.98) translateZ(0);
     transition: transform 80ms ease-out;
-  }
-  .card-hover {
-    transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease;
   }
 }
 
 /* ── Nav scrolled state ── */
 .nav-scrolled {
-  background: rgba(246, 244, 239, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(246, 244, 239, 0.95);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
-/* ── Heading italic accent — navy color on every <em> in a heading ── */
+/* ── Heading italic accent ── */
 .font-heading em {
   font-style: italic;
   color: var(--color-accent);
 }
 
-/* ── About highlight cards — spring slide on hover, fast exit ── */
+/* ─────────────────────────────────────────────
+   CTA PRIMARY BUTTON — SWEEP FILL
+   Accent-blue wipes in from left on hover.
+   The ::after pseudo-element slides behind the
+   text, creating a premium reveal transition.
+───────────────────────────────────────────── */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform: translateX(-101%);
+  transition: transform 500ms var(--ease-out-quint);
+  z-index: -1;
+}
+@media (hover: hover) {
+  .btn-primary:hover::after { transform: translateX(0); }
+}
+.btn-primary:active { transform: scale(0.97) translateZ(0); }
+
+/* ─────────────────────────────────────────────
+   CTA SECONDARY BUTTON — SWEEP FILL
+   Near-black fills in from left; text goes white.
+───────────────────────────────────────────── */
+.btn-secondary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 360ms var(--ease-out-quint), border-color 200ms ease;
+}
+.btn-secondary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  transform: translateX(-101%);
+  transition: transform 500ms var(--ease-out-quint);
+  z-index: -1;
+}
+@media (hover: hover) {
+  .btn-secondary:hover::after { transform: translateX(0); }
+  .btn-secondary:hover { color: white; border-color: var(--color-primary); }
+}
+.btn-secondary:active { transform: scale(0.97) translateZ(0); }
+
+/* ─────────────────────────────────────────────
+   PROFILE PHOTO — SUBTLE ZOOM ON HOVER
+   overflow: hidden clips scaled image to
+   the rounded-2xl border-radius on the wrapper.
+───────────────────────────────────────────── */
+.profile-img-wrap {
+  overflow: hidden;
+}
+.profile-img-wrap img {
+  transition: transform 800ms var(--ease-out-quint);
+}
+@media (hover: hover) {
+  .profile-img-wrap:hover img {
+    transform: scale(1.04) translateZ(0);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   ABOUT HIGHLIGHT CARDS
+   Slide right 8px on hover — more restrained
+   than the previous 10px.
+───────────────────────────────────────────── */
 .highlight-card {
   transition: transform var(--duration-hover-out) var(--ease-in-expo),
               border-color var(--duration-hover-out) ease;
 }
 @media (hover: hover) {
   .highlight-card:hover {
-    transform: translateX(10px);
+    transform: translateX(8px) translateZ(0);
     border-color: var(--color-accent);
-    transition: transform var(--duration-hover) var(--ease-spring),
-                border-color var(--duration-hover) ease;
+    transition: transform 300ms var(--ease-out-quint),
+                border-color 200ms ease;
+  }
+}
+@media (hover: none) {
+  .highlight-card:active {
+    transform: translateX(4px) translateZ(0);
+    border-color: var(--color-accent-light);
+    transition: transform 80ms ease-out, border-color 80ms ease-out;
   }
 }
 
-/* ── Stat counter — number starts invisible, JS triggers ── */
-[data-counter] { will-change: contents; }
+/* ── Stat counter — tabular numbers for stable width ── */
+[data-counter] {
+  will-change: contents;
+  font-variant-numeric: tabular-nums;
+}
 
-/* ── Hero decorative circles — slow independent float ── */
+/* ─────────────────────────────────────────────
+   HERO DECORATIVE CIRCLES — AMBIENT FLOAT
+   Longer periods (14s / 18s) = more ambient,
+   less distracting.
+───────────────────────────────────────────── */
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-14px); }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-16px); }
 }
 @keyframes float-slow-reverse {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(10px); }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(12px); }
 }
 .hero-float-outer {
-  animation: float-slow 10s ease-in-out infinite;
+  animation: float-slow 14s ease-in-out infinite;
   will-change: transform;
 }
 .hero-float-inner {
-  animation: float-slow-reverse 13s ease-in-out infinite;
+  animation: float-slow-reverse 18s ease-in-out infinite;
   will-change: transform;
 }
 
-/* ── Scroll indicator — gentle vertical bounce ── */
+/* ── Scroll indicator — smooth pulse ── */
 @keyframes scroll-nudge {
-  0%, 100% { opacity: 0.45; transform: translateY(0); }
-  50%       { opacity: 0.85; transform: translateY(5px); }
+  0%   { opacity: 0.3; transform: translateY(0); }
+  50%  { opacity: 0.65; transform: translateY(7px); }
+  100% { opacity: 0.3; transform: translateY(0); }
 }
 .scroll-indicator {
-  animation: scroll-nudge 2.4s ease-in-out infinite;
+  animation: scroll-nudge 2.8s ease-in-out infinite;
   will-change: opacity, transform;
 }
 
-/* ── Reduced motion ── */
+/* ─────────────────────────────────────────────
+   MOBILE MENU — STAGGERED ITEM FADE
+   Items fade + rise in as the menu slides open.
+───────────────────────────────────────────── */
+#mobile-menu li a {
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 200ms ease, transform 200ms var(--ease-out-quint);
+}
+#mobile-menu[aria-hidden="false"] li a {
+  opacity: 1;
+  transform: translateY(0);
+}
+#mobile-menu li:nth-child(1) a { transition-delay: 60ms; }
+#mobile-menu li:nth-child(2) a { transition-delay: 110ms; }
+#mobile-menu li:nth-child(3) a { transition-delay: 160ms; }
+#mobile-menu li:nth-child(4) a { transition-delay: 210ms; }
+#mobile-menu li:nth-child(5) a { transition-delay: 260ms; }
+#mobile-menu li:nth-child(6) a { transition-delay: 310ms; }
+
+/* ── Skills icon — subtle lift on parent cell hover ── */
+.skill-icon {
+  transition: transform 300ms var(--ease-out-quint), border-color 300ms ease;
+}
+@media (hover: hover) {
+  .group:hover .skill-icon {
+    transform: translateY(-3px) translateZ(0);
+  }
+}
+
+/* ── Reduced motion — kill everything ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -195,4 +358,6 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
   .reveal { opacity: 1; transform: none; filter: none; }
   .gradient-text { animation: none; }
   .hero-float-outer, .hero-float-inner, .scroll-indicator { animation: none; }
+  .btn-primary::after, .btn-secondary::after { display: none; }
+  .profile-img-wrap img { transition: none; }
 }

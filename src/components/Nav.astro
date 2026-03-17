@@ -30,7 +30,7 @@ const navLinks = [
         <li>
           <a
             href={href}
-            class="relative px-4 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200 cursor-pointer group"
+            class="relative px-4 py-2 text-sm font-medium text-text-secondary hover:text-primary cursor-pointer group" style="transition: color 220ms cubic-bezier(0.22,1,0.36,1);"
             style="font-family: var(--font-body);"
           >
             {label}
@@ -65,11 +65,13 @@ const navLinks = [
     </button>
   </div>
 
-  <!-- Mobile menu -->
+  <!-- Mobile menu — slides open via max-height transition -->
   <div
     id="mobile-menu"
-    class="md:hidden hidden bg-bg border-t border-border"
+    class="md:hidden bg-bg border-t border-border overflow-hidden"
+    style="max-height: 0; transition: max-height 320ms cubic-bezier(0.22, 1, 0.36, 1);"
     role="menu"
+    aria-hidden="true"
   >
     <ul class="px-4 py-3 space-y-1" role="list">
       {navLinks.map(({ href, label }) => (
@@ -105,22 +107,31 @@ const navLinks = [
   const menu = document.getElementById('mobile-menu');
   const menuIcon = document.getElementById('menu-icon');
 
+  function openMenu() {
+    if (!menu) return;
+    menu.style.maxHeight = menu.scrollHeight + 'px';
+    menu.setAttribute('aria-hidden', 'false');
+    btn?.setAttribute('aria-expanded', 'true');
+    btn?.setAttribute('aria-label', 'Close menu');
+    if (menuIcon) menuIcon.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+  }
+
+  function closeMenu() {
+    if (!menu) return;
+    menu.style.maxHeight = '0px';
+    menu.setAttribute('aria-hidden', 'true');
+    btn?.setAttribute('aria-expanded', 'false');
+    btn?.setAttribute('aria-label', 'Open menu');
+    if (menuIcon) menuIcon.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+  }
+
   btn?.addEventListener('click', () => {
-    const isOpen = menu?.classList.toggle('hidden') === false;
-    btn.setAttribute('aria-expanded', String(isOpen));
-    btn.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-    if (menuIcon) {
-      menuIcon.setAttribute('d', isOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16');
-    }
+    const isClosed = menu?.getAttribute('aria-hidden') === 'true';
+    isClosed ? openMenu() : closeMenu();
   });
 
   menu?.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      menu.classList.add('hidden');
-      btn?.setAttribute('aria-expanded', 'false');
-      btn?.setAttribute('aria-label', 'Open menu');
-      if (menuIcon) menuIcon.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
-    });
+    link.addEventListener('click', () => closeMenu());
   });
 
   // Scroll: add editorial border-bottom to nav + scroll-spy active section
