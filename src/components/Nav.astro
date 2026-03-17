@@ -123,13 +123,32 @@ const navLinks = [
     });
   });
 
-  // Scroll: add editorial border-bottom to nav
+  // Scroll: add editorial border-bottom to nav + scroll-spy active section
   const nav = document.getElementById('site-nav');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 40) {
+  const sections = Array.from(document.querySelectorAll<HTMLElement>('section[id]'));
+  const navAnchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('#site-nav a[href^="#"]:not([href="#"])'));
+
+  function updateScroll() {
+    const scrollY = window.scrollY;
+
+    // Nav border on scroll
+    if (scrollY > 40) {
       nav?.classList.add('nav-scrolled');
     } else {
       nav?.classList.remove('nav-scrolled');
     }
-  }, { passive: true });
+
+    // Scroll-spy: find the last section whose top edge is above the viewport midpoint
+    const mid = scrollY + window.innerHeight * 0.35;
+    let activeId = '';
+    for (const section of sections) {
+      if (section.offsetTop <= mid) activeId = section.id;
+    }
+    navAnchors.forEach((anchor) => {
+      anchor.classList.toggle('nav-link-active', anchor.getAttribute('href') === `#${activeId}`);
+    });
+  }
+
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll();
 </script>

@@ -34,6 +34,16 @@
 html { scroll-behavior: smooth; }
 body { overflow-x: hidden; }
 
+/* ── Tap delay removal — eliminates 300ms delay on touch devices ── */
+a, button { touch-action: manipulation; }
+
+/* ── Scroll offset — compensate for fixed nav height ── */
+section[id] { scroll-margin-top: 5rem; }
+
+/* ── Nav scroll-spy active link ── */
+a.nav-link-active { color: var(--color-primary); font-weight: 500; }
+a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
+
 *:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
