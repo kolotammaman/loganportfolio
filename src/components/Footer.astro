@@ -2,34 +2,33 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="py-10 border-t border-border" role="contentinfo">
+<footer class="py-8 border-t border-border" role="contentinfo">
   <div class="max-w-6xl mx-auto px-6">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-3">
-        <span class="font-heading font-black text-lg">
-          <span class="text-primary">L</span><span class="text-accent">M</span>
-        </span>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-5">
+
+      <div class="flex items-center gap-4">
+        <span class="font-heading font-bold text-lg text-primary">LM</span>
         <span class="text-border">|</span>
-        <p class="text-text-muted text-sm">
+        <p class="text-text-muted text-sm" style="font-family: var(--font-body);">
           &copy; {currentYear} Logan Moseley
         </p>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3">
         <a
           href="mailto:loganjamesmoseley@gmail.com"
-          class="w-10 h-10 rounded-xl bg-primary/5 hover:bg-accent hover:shadow-md hover:shadow-accent/20 flex items-center justify-center text-text-muted hover:text-white transition-all duration-300 cursor-pointer"
+          class="w-9 h-9 border border-border hover:border-accent hover:bg-accent flex items-center justify-center text-text-muted hover:text-white transition-all duration-300 cursor-pointer"
           aria-label="Email Logan"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </a>
         <a
           href="https://linkedin.com/in/loganjmoseley"
           target="_blank"
           rel="noopener noreferrer"
-          class="w-10 h-10 rounded-xl bg-primary/5 hover:bg-accent hover:shadow-md hover:shadow-accent/20 flex items-center justify-center text-text-muted hover:text-white transition-all duration-300 cursor-pointer"
+          class="w-9 h-9 border border-border hover:border-accent hover:bg-accent flex items-center justify-center text-text-muted hover:text-white transition-all duration-300 cursor-pointer"
           aria-label="LinkedIn profile"
         >
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -37,6 +36,7 @@ const currentYear = new Date().getFullYear();
           </svg>
         </a>
       </div>
+
     </div>
   </div>
 </footer>

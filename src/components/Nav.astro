@@ -14,12 +14,14 @@ const navLinks = [
   aria-label="Main navigation"
 >
   <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+
+    <!-- Logotype -->
     <a
       href="#"
-      class="font-heading font-black text-xl tracking-tight cursor-pointer transition-colors duration-200"
-      aria-label="Logan Moseley - Back to top"
+      class="font-heading font-bold text-xl tracking-tight cursor-pointer text-primary hover:text-accent transition-colors duration-200"
+      aria-label="Logan Moseley — Back to top"
     >
-      <span class="text-primary">L</span><span class="text-accent">M</span>
+      LM
     </a>
 
     <!-- Desktop nav -->
@@ -28,10 +30,11 @@ const navLinks = [
         <li>
           <a
             href={href}
-            class="relative px-4 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer group"
+            class="relative px-4 py-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors duration-200 cursor-pointer group"
+            style="font-family: var(--font-body);"
           >
             {label}
-            <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-accent rounded-full transition-all duration-200 group-hover:w-5" aria-hidden="true" />
+            <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px bg-primary transition-all duration-200 group-hover:w-5" aria-hidden="true" />
           </a>
         </li>
       ))}
@@ -40,7 +43,8 @@ const navLinks = [
           href="/LoganMoseley_Resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          class="ml-3 px-5 py-2 rounded-full text-sm font-semibold bg-primary text-white hover:bg-accent transition-colors duration-200 cursor-pointer"
+          class="ml-4 px-5 py-2 text-sm font-semibold border border-primary text-primary hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
+          style="font-family: var(--font-body);"
         >
           Resume
         </a>
@@ -50,7 +54,7 @@ const navLinks = [
     <!-- Mobile menu button -->
     <button
       id="mobile-menu-btn"
-      class="md:hidden p-2 rounded-lg hover:bg-accent/5 transition-colors duration-200 cursor-pointer"
+      class="md:hidden p-2 hover:bg-border/30 transition-colors duration-200 cursor-pointer"
       aria-expanded="false"
       aria-controls="mobile-menu"
       aria-label="Open menu"
@@ -64,7 +68,7 @@ const navLinks = [
   <!-- Mobile menu -->
   <div
     id="mobile-menu"
-    class="md:hidden hidden bg-white/95 backdrop-blur-xl border-t border-border"
+    class="md:hidden hidden bg-bg border-t border-border"
     role="menu"
   >
     <ul class="px-4 py-3 space-y-1" role="list">
@@ -72,8 +76,9 @@ const navLinks = [
         <li>
           <a
             href={href}
-            class="block px-4 py-3 rounded-xl text-base font-medium text-text-secondary hover:text-accent hover:bg-accent/5 transition-colors duration-200 cursor-pointer"
+            class="block px-4 py-3 text-base font-medium text-text-secondary hover:text-primary hover:bg-border/20 transition-colors duration-200 cursor-pointer"
             role="menuitem"
+            style="font-family: var(--font-body);"
           >
             {label}
           </a>
@@ -84,8 +89,9 @@ const navLinks = [
           href="/LoganMoseley_Resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          class="block px-4 py-3 rounded-xl text-base font-semibold text-accent cursor-pointer"
+          class="block px-4 py-3 text-base font-semibold text-accent cursor-pointer"
           role="menuitem"
+          style="font-family: var(--font-body);"
         >
           Resume
         </a>
@@ -95,7 +101,6 @@ const navLinks = [
 </nav>
 
 <script>
-  // Mobile menu toggle
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
   const menuIcon = document.getElementById('menu-icon');
@@ -118,13 +123,13 @@ const navLinks = [
     });
   });
 
-  // Scroll: add glass bg to nav
+  // Scroll: add editorial border-bottom to nav
   const nav = document.getElementById('site-nav');
   window.addEventListener('scroll', () => {
     if (window.scrollY > 40) {
-      nav?.classList.add('bg-white/80', 'backdrop-blur-xl', 'shadow-sm');
+      nav?.classList.add('nav-scrolled');
     } else {
-      nav?.classList.remove('bg-white/80', 'backdrop-blur-xl', 'shadow-sm');
+      nav?.classList.remove('nav-scrolled');
     }
   }, { passive: true });
 </script>
