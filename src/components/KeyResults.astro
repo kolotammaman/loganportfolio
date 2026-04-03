@@ -1,0 +1,56 @@
+---
+const results = [
+  {
+    number: '01',
+    label: 'SOP Authorship',
+    description: 'Wrote standard operating procedures that standardized job roles and daily workflows across clinical teams and market-level operations.',
+  },
+  {
+    number: '02',
+    label: 'Workflow and Checklist Design',
+    description: 'Designed pre-staging systems, closing checklists, and process documentation now used daily by active clinic teams to maintain operational consistency.',
+  },
+  {
+    number: '03',
+    label: 'Compliance Track Record',
+    description: 'Perfect HIPAA compliance record across all clinic operations. Zero breaches, zero missed checkpoints, and crash cart materials maintained without exception.',
+  },
+  {
+    number: '04',
+    label: 'Sustainability and Tracking',
+    description: 'Contributed to recycling tracking and operational sustainability initiatives within Penn Dental Medicine alongside core operational responsibilities.',
+  },
+];
+---
+
+<section id="results" class="py-24 md:py-32 border-t border-border" aria-labelledby="results-heading">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <!-- Section label -->
+    <div class="reveal mb-14">
+      <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-body);">
+        02 / Key Results
+      </p>
+      <h2 id="results-heading" class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-primary leading-tight">
+        What I've<br><em>built and delivered.</em>
+      </h2>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-6">
+      {results.map((result, i) => (
+        <div class={`reveal reveal-delay-${i + 1} glass rounded-xl p-8 card-hover border-t-2 border-t-accent-gold`}>
+          <p class="font-heading font-bold text-5xl text-accent-gold/20 leading-none mb-4 select-none" aria-hidden="true">
+            {result.number}
+          </p>
+          <h3 class="font-heading font-semibold text-xl text-primary mb-3">
+            {result.label}
+          </h3>
+          <p class="text-text-secondary text-sm leading-relaxed" style="font-family: var(--font-body);">
+            {result.description}
+          </p>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

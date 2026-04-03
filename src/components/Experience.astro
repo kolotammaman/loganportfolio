@@ -4,28 +4,28 @@ const jobs = [
     title: 'Instrument Management & Customer Service Specialist',
     company: 'University of Pennsylvania, Penn Dental Medicine',
     location: 'Philadelphia, PA',
-    period: 'May 2023 – Present',
+    period: 'May 2023 to Present',
     current: true,
     bullets: [
-      'Manage daily clinic flow across multiple specialties by coordinating instrument readiness, kit staging, and schedule alignment so providers never wait on supplies.',
-      'Maintained a 15-minute turnaround on high-priority items by designing a pre-staging system around sterilization cycle timing.',
-      'Serve as a first-point-of-contact for residents and faculty under time pressure, anticipating needs, resolving issues, and keeping communication clear.',
-      'Produce and maintain clinic documentation including SOPs, signage, checklists, and training materials across version-controlled workflows.',
-      'Coordinate cross-clinic sourcing and vendor substitutions to prevent stockouts, with proactive status updates to affected teams.',
-      'Authored the closing checklist now used to standardize end-of-day readiness across the sterilization team.',
+      'Manage daily clinic flow across multiple specialties by coordinating instrument readiness, kit staging, and schedule alignment. Providers never wait on supplies.',
+      'Maintained a 15-minute turnaround on high-priority items by building a pre-staging system around sterilization cycle timing.',
+      'Serve as the first point of contact for residents and faculty under time pressure. I anticipate needs, resolve issues quickly, and keep communication accurate.',
+      'Produce and maintain clinic documentation including SOPs, signage, checklists, and training materials managed through version-controlled workflows.',
+      'Coordinate cross-clinic sourcing and vendor substitutions to prevent stockouts, with proactive updates to any teams affected.',
+      'Authored the closing checklist now used by the full sterilization team to standardize end-of-day readiness.',
     ],
   },
   {
     title: 'Operations Associate',
     company: 'The Rounds',
     location: 'Philadelphia, PA',
-    period: 'Sep 2021 – Apr 2023',
+    period: 'Sep 2021 to Apr 2023',
     current: false,
     bullets: [
       'Coordinated daily delivery routes and shift logistics across the Philadelphia market using Slack and Asana.',
-      'Resolved high-volume customer issues and maintained documentation of problems and resolutions.',
-      'Wrote standard operating procedures that restructured job roles across the market.',
-      'Promoted from Packing & Delivery Associate to Operations Associate within three months of starting.',
+      'Resolved high-volume customer issues and maintained a running log of problems and resolutions for team reference.',
+      'Wrote standard operating procedures that restructured job roles and brought clarity to operations across the market.',
+      'Promoted from Packing and Delivery Associate to Operations Associate within three months of starting.',
     ],
   },
 ];
@@ -37,7 +37,7 @@ const jobs = [
     <!-- Section label -->
     <div class="reveal mb-14">
       <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-body);">
-        02 / Experience
+        03 / Experience
       </p>
       <h2 id="experience-heading" class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-primary leading-tight mb-4">
         Where I've<br><em>made impact.</em>
@@ -49,7 +49,7 @@ const jobs = [
 
     <div class="space-y-6">
       {jobs.map((job, jobIndex) => (
-        <article class={`reveal reveal-delay-${jobIndex + 1} glass rounded-xl p-7 sm:p-9 card-hover ${job.current ? 'border-l-2 border-l-accent' : ''}`}>
+        <article class={`reveal reveal-delay-${jobIndex + 1} glass rounded-xl p-7 sm:p-9 card-hover ${job.current ? 'border-l-2 border-l-accent-gold' : ''}`}>
 
           <!-- Header row -->
           <div class="flex flex-wrap items-start justify-between gap-4 mb-6">

@@ -8,7 +8,10 @@
   --color-accent-light: #2D5585;
   --color-accent-soft: #EBF0F7;
   --color-accent-glow: rgba(28, 53, 87, 0.12);
-  --color-bg: #F6F4EF;
+  --color-accent-gold: #C4953A;
+  --color-accent-gold-light: #D4A84B;
+  --color-accent-gold-soft: rgba(196, 149, 58, 0.10);
+  --color-bg: #EDE9E0;
   --color-bg-dark: #0D0D0C;
   --color-bg-card: #FFFFFF;
   --color-text: #111110;
@@ -180,7 +183,7 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 
 /* ── Nav scrolled state ── */
 .nav-scrolled {
-  background: rgba(246, 244, 239, 0.95);
+  background: rgba(237, 233, 224, 0.95);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   border-bottom: 1px solid var(--color-border);
@@ -272,7 +275,7 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 @media (hover: hover) {
   .highlight-card:hover {
     transform: translateX(8px) translateZ(0);
-    border-color: var(--color-accent);
+    border-color: var(--color-accent-gold);
     transition: transform 300ms var(--ease-out-quint),
                 border-color 200ms ease;
   }
@@ -280,7 +283,7 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 @media (hover: none) {
   .highlight-card:active {
     transform: translateX(4px) translateZ(0);
-    border-color: var(--color-accent-light);
+    border-color: var(--color-accent-gold-light);
     transition: transform 80ms ease-out, border-color 80ms ease-out;
   }
 }
@@ -343,6 +346,7 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
 #mobile-menu li:nth-child(4) a { transition-delay: 210ms; }
 #mobile-menu li:nth-child(5) a { transition-delay: 260ms; }
 #mobile-menu li:nth-child(6) a { transition-delay: 310ms; }
+#mobile-menu li:nth-child(7) a { transition-delay: 360ms; }
 
 /* ── Skills icon — subtle lift on parent cell hover ── */
 .skill-icon {
