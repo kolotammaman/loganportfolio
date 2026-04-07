@@ -40,7 +40,7 @@ const { title, description } = Astro.props;
     <canvas
       id="particle-canvas"
       aria-hidden="true"
-      style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;"
+      style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;will-change:transform;transform:translateZ(0);"
     ></canvas>
 
     <div style="position:relative;z-index:1;">
@@ -56,6 +56,7 @@ const { title, description } = Astro.props;
         const ctx = canvas.getContext('2d')!;
 
         let W = 0, H = 0;
+        const isMobile = window.innerWidth < 768;
         function resize() {
           W = canvas.width  = window.innerWidth;
           H = canvas.height = window.innerHeight;
@@ -83,8 +84,13 @@ const { title, description } = Astro.props;
           [ORANGE, RUST],
         ];
 
-        // ── Depth layers — feature layer bumped to 13px max ──
-        const LAYERS = [
+        // ── Depth layers — mobile uses fewer particles to stay smooth ──
+        const LAYERS = isMobile ? [
+          { n:  5, rMin: 0.7, rMax:  1.2, spdMult: 0.55, baseAlpha: 0.13 }, // far
+          { n:  7, rMin: 1.3, rMax:  2.4, spdMult: 1.00, baseAlpha: 0.22 }, // mid
+          { n:  3, rMin: 3.0, rMax:  5.5, spdMult: 1.55, baseAlpha: 0.32 }, // near
+          { n:  2, rMin: 7.0, rMax: 13.0, spdMult: 1.20, baseAlpha: 0.40 }, // feature
+        ] : [
           { n: 10, rMin: 0.7, rMax:  1.2, spdMult: 0.55, baseAlpha: 0.13 }, // far
           { n: 12, rMin: 1.3, rMax:  2.4, spdMult: 1.00, baseAlpha: 0.22 }, // mid
           { n:  5, rMin: 3.0, rMax:  5.5, spdMult: 1.55, baseAlpha: 0.32 }, // near
@@ -200,16 +206,24 @@ const { title, description } = Astro.props;
         }
 
         let frameCount = 0;
-        let nextTrailCheck = 3; // first scheduling attempt at t=3s
+        let nextTrailCheck = 3;
+        let lastFrameTime = 0;
+        const FRAME_MIN = isMobile ? 1000 / 30 : 0; // 30fps cap on mobile
 
         function frame(now: number) {
+          if (isMobile && now - lastFrameTime < FRAME_MIN) {
+            requestAnimationFrame(frame);
+            return;
+          }
+          lastFrameTime = now;
           const t = now / 1000;
           frameCount++;
 
           ctx.clearRect(0, 0, W, H);
 
-          // — Blobs — with pulse state machine —
-          for (const b of blobs) {
+          // — Blobs — (mobile uses first 4 only) —
+          const blobsToRender = isMobile ? blobs.slice(0, 4) : blobs;
+          for (const b of blobsToRender) {
             // Pulse: idle → swell (10s to 2.2×) → settle (16s back to 1×) → idle
             if (b.pulseState === 'idle' && t >= b.nextPulse) {
               b.pulseState = 'swell'; b.pulseStart = t;
@@ -273,54 +287,56 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Record trail positions every frame for smooth shooting-star tails —
+          // — Record trail positions every frame —
+          const TRAIL_MAX = isMobile ? 60 : 120;
           for (const p of particles) {
             if (p.trailState !== 'idle') {
               p.trail.push({ x: p.x, y: p.y });
-              if (p.trail.length > 55) p.trail.shift();
+              if (p.trail.length > TRAIL_MAX) p.trail.shift();
             }
           }
 
           const breathVals = particles.map(p => breathVal(p, t));
 
-          // — Connections —
-          for (let i = 0; i < COUNT; i++) {
-            for (let j = i + 1; j < COUNT; j++) {
-              const dx = particles[i].x - particles[j].x;
-              const dy = particles[i].y - particles[j].y;
-              const d  = Math.sqrt(dx * dx + dy * dy);
-              if (d < MAX_DIST) {
-                const avgBreath = (breathVals[i] + breathVals[j]) * 0.5;
-                const avgAlpha  = (particles[i].baseAlpha + particles[j].baseAlpha) * 0.5;
-                const lineAlpha = avgAlpha * avgBreath * (1 - d / MAX_DIST) * 0.55;
-                ctx.beginPath();
-                ctx.moveTo(particles[i].x, particles[i].y);
-                ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.strokeStyle = `rgba(17,17,16,${lineAlpha.toFixed(3)})`;
-                ctx.lineWidth = 0.5;
-                ctx.stroke();
+          // — Connections — skipped on mobile (O(n²) is too costly) —
+          if (!isMobile) {
+            for (let i = 0; i < COUNT; i++) {
+              for (let j = i + 1; j < COUNT; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const d  = Math.sqrt(dx * dx + dy * dy);
+                if (d < MAX_DIST) {
+                  const avgBreath = (breathVals[i] + breathVals[j]) * 0.5;
+                  const avgAlpha  = (particles[i].baseAlpha + particles[j].baseAlpha) * 0.5;
+                  const lineAlpha = avgAlpha * avgBreath * (1 - d / MAX_DIST) * 0.55;
+                  ctx.beginPath();
+                  ctx.moveTo(particles[i].x, particles[i].y);
+                  ctx.lineTo(particles[j].x, particles[j].y);
+                  ctx.strokeStyle = `rgba(17,17,16,${lineAlpha.toFixed(3)})`;
+                  ctx.lineWidth = 0.5;
+                  ctx.stroke();
+                }
               }
             }
           }
 
-          // — Draw trails — slow-motion shooting star —
+          // — Draw trails — opacity constant (same as the dot), only size tapers —
           for (let i = 0; i < COUNT; i++) {
             const p = particles[i];
             if (p.trailAlpha < 0.01 || p.trail.length < 2) continue;
-            const len = p.trail.length;
-            const r0  = currentR(p, t);
+            const len  = p.trail.length;
+            const r0   = currentR(p, t);
+            const dotA = p.baseAlpha * breathVals[i]; // same opacity as the live dot
             for (let k = 0; k < len; k++) {
-              const prog = k / (len - 1);          // 0 = oldest tail, 1 = head
-              // prog^1.3: softer falloff than prog^2 → longer visible trail
-              const tA = p.trailAlpha * Math.pow(prog, 1.3) * 0.70;
-              // Head is nearly full dot size; tail tapers to a fine point
-              const tR = Math.max(0.4, r0 * (0.12 + 0.88 * prog));
-              if (tA > 0.006) {
-                ctx.beginPath();
-                ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
-                ctx.fillStyle = dotColor(p, t, tA);
-                ctx.fill();
-              }
+              const prog = k / (len - 1);               // 0 = oldest tail end, 1 = head
+              // Opacity: constant at the dot's own level, only modulated by trail fade-in/out
+              const tA = p.trailAlpha * dotA;
+              // Size: gentle power-curve taper — wide near head, fine point at tail
+              const tR = Math.max(0.3, r0 * Math.pow(prog, 0.75));
+              ctx.beginPath();
+              ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
+              ctx.fillStyle = dotColor(p, t, tA);
+              ctx.fill();
             }
           }
 
