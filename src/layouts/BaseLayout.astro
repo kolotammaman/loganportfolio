@@ -96,8 +96,9 @@ const { title, description } = Astro.props;
         // ── Three depth layers: far / mid / near ──
         const LAYERS = [
           { n: 10, rMin: 0.7, rMax: 1.2, spdMult: 0.55, baseAlpha: 0.13 }, // far
-          { n: 12, rMin: 1.3, rMax: 1.9, spdMult: 1.00, baseAlpha: 0.20 }, // mid
-          { n:  8, rMin: 2.1, rMax: 3.2, spdMult: 1.55, baseAlpha: 0.28 }, // near
+          { n: 12, rMin: 1.3, rMax: 2.4, spdMult: 1.00, baseAlpha: 0.22 }, // mid
+          { n:  5, rMin: 3.0, rMax: 5.5, spdMult: 1.55, baseAlpha: 0.32 }, // near
+          { n:  3, rMin: 6.0, rMax: 9.5, spdMult: 1.20, baseAlpha: 0.38 }, // feature
         ];
 
         interface Particle {
