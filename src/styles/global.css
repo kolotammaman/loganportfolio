@@ -37,7 +37,7 @@
 
 /* ── Base ── */
 html { scroll-behavior: smooth; }
-body { overflow-x: hidden; }
+body { overflow-x: hidden; overscroll-behavior: none; }
 
 /* ── Branded text selection ── */
 ::selection {

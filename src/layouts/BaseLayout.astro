@@ -40,7 +40,7 @@ const { title, description } = Astro.props;
     <canvas
       id="particle-canvas"
       aria-hidden="true"
-      style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;will-change:transform;transform:translateZ(0);overscroll-behavior:none;"
+      style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;will-change:transform;transform:translateZ(0);"
     ></canvas>
 
     <div style="position:relative;z-index:1;">
@@ -62,7 +62,13 @@ const { title, description } = Astro.props;
           H = canvas.height = window.innerHeight;
         }
         resize();
-        window.addEventListener('resize', resize, { passive: true });
+        // Debounce resize: iOS Safari fires resize as browser chrome hides/shows
+        // during scroll, which resets canvas.width/height and causes a visible flash.
+        let resizeTimer: ReturnType<typeof setTimeout>;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(resize, 200);
+        }, { passive: true });
 
         // ── Color primaries ──
         type RGB = [number, number, number];
@@ -293,9 +299,9 @@ const { title, description } = Astro.props;
 
           const breathVals = particles.map(p => breathVal(p, t));
 
-          // — Connections — skipped on mobile (O(n²) is too costly) —
-          // Lines are trimmed to dot edges so they don't bleed through filled circles.
-          if (!isMobile) {
+          // — Connections — trimmed to dot edges so lines don't bleed through circles —
+          // Mobile now has only ~11 nodes so O(n²) = ~121 checks per frame — trivial.
+          {
             for (let i = 0; i < COUNT; i++) {
               for (let j = i + 1; j < COUNT; j++) {
                 const dx = particles[j].x - particles[i].x;
