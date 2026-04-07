@@ -369,6 +369,7 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
   .reveal { opacity: 1; transform: none; filter: none; }
   .gradient-text { animation: none; }
   .hero-float-outer, .hero-float-inner, .scroll-indicator { animation: none; }
+  #particle-canvas { display: none; }
   .btn-primary::after, .btn-secondary::after { display: none; }
   .profile-img-wrap img { transition: none; }
 }
