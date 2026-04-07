@@ -84,17 +84,12 @@ const { title, description } = Astro.props;
           [ORANGE, RUST],
         ];
 
-        // ── Depth layers — mobile uses fewer particles to stay smooth ──
-        const LAYERS = isMobile ? [
-          { n:  5, rMin: 0.7, rMax:  1.2, spdMult: 0.55, baseAlpha: 0.13 }, // far
-          { n:  7, rMin: 1.3, rMax:  2.4, spdMult: 1.00, baseAlpha: 0.22 }, // mid
-          { n:  3, rMin: 3.0, rMax:  5.5, spdMult: 1.55, baseAlpha: 0.32 }, // near
-          { n:  2, rMin: 7.0, rMax: 13.0, spdMult: 1.20, baseAlpha: 0.40 }, // feature
-        ] : [
-          { n: 10, rMin: 0.7, rMax:  1.2, spdMult: 0.55, baseAlpha: 0.13 }, // far
-          { n: 12, rMin: 1.3, rMax:  2.4, spdMult: 1.00, baseAlpha: 0.22 }, // mid
-          { n:  5, rMin: 3.0, rMax:  5.5, spdMult: 1.55, baseAlpha: 0.32 }, // near
-          { n:  3, rMin: 7.0, rMax: 13.0, spdMult: 1.20, baseAlpha: 0.40 }, // feature
+        // ── Tier properties (size + alpha per depth tier) ──
+        const TIERS = [
+          { rMin: 0.7,  rMax:  1.2, baseAlpha: 0.13 }, // 0 far
+          { rMin: 1.3,  rMax:  2.4, baseAlpha: 0.22 }, // 1 mid
+          { rMin: 3.0,  rMax:  5.5, baseAlpha: 0.32 }, // 2 near
+          { rMin: 7.0,  rMax: 13.0, baseAlpha: 0.40 }, // 3 feature
         ];
 
         interface Particle {
@@ -107,29 +102,85 @@ const { title, description } = Astro.props;
           boostStartTime: number; boostDuration: number;
         }
 
+        // ── Constellation definitions ──
+        // cx/cy: group center as fraction of viewport W/H
+        // vx/vy: group drift in px/frame (very slow so shapes hold)
+        // nodes: pixel offsets from group center + depth tier
+        interface CNode { dx: number; dy: number; tier: number; }
+        interface CDef  { cx: number; cy: number; vx: number; vy: number; nodes: CNode[]; }
+
+        // Desktop: 5 constellations — Orion-like, triangle, square, pentagon, diamond
+        const DESKTOP_DEFS: CDef[] = [
+          { cx:0.18, cy:0.22, vx: 0.012, vy: 0.008, nodes: [
+            {dx:   0, dy: -55, tier:2}, {dx:  45, dy: -10, tier:1}, {dx: -45, dy: -10, tier:1},
+            {dx:   0, dy:  45, tier:3}, {dx:  72, dy:  62, tier:1}, {dx: -72, dy:  62, tier:1},
+          ]},
+          { cx:0.78, cy:0.28, vx:-0.010, vy: 0.012, nodes: [
+            {dx:   0, dy: -65, tier:3}, {dx:  58, dy:  32, tier:2}, {dx: -58, dy:  32, tier:1},
+          ]},
+          { cx:0.46, cy:0.54, vx: 0.008, vy:-0.010, nodes: [
+            {dx: -50, dy: -50, tier:1}, {dx:  50, dy: -50, tier:2},
+            {dx:  50, dy:  50, tier:1}, {dx: -50, dy:  50, tier:3},
+          ]},
+          { cx:0.82, cy:0.74, vx:-0.012, vy:-0.008, nodes: [
+            {dx:   0, dy: -60, tier:2}, {dx:  57, dy: -19, tier:1}, {dx:  35, dy:  48, tier:1},
+            {dx: -35, dy:  48, tier:2}, {dx: -57, dy: -19, tier:3},
+          ]},
+          { cx:0.20, cy:0.76, vx: 0.014, vy:-0.006, nodes: [
+            {dx:   0, dy: -65, tier:1}, {dx:  58, dy:   0, tier:3},
+            {dx:   0, dy:  52, tier:1}, {dx: -58, dy:   0, tier:2},
+          ]},
+        ];
+
+        // Mobile: 3 simpler constellations (connections not drawn anyway)
+        const MOBILE_DEFS: CDef[] = [
+          { cx:0.25, cy:0.20, vx: 0.010, vy: 0.008, nodes: [
+            {dx:   0, dy: -48, tier:3}, {dx:  42, dy:  24, tier:1}, {dx: -42, dy:  24, tier:1},
+          ]},
+          { cx:0.72, cy:0.50, vx:-0.009, vy: 0.010, nodes: [
+            {dx: -38, dy: -38, tier:1}, {dx:  38, dy: -38, tier:2},
+            {dx:  38, dy:  38, tier:1}, {dx: -38, dy:  38, tier:3},
+          ]},
+          { cx:0.30, cy:0.78, vx: 0.011, vy:-0.007, nodes: [
+            {dx:   0, dy: -50, tier:1}, {dx:  45, dy:   0, tier:3},
+            {dx:   0, dy:  40, tier:1}, {dx: -45, dy:   0, tier:2},
+          ]},
+        ];
+
+        const DEFS = isMobile ? MOBILE_DEFS : DESKTOP_DEFS;
+
+        function makeParticle(x: number, y: number, tier: number, vx: number, vy: number): Particle {
+          const T = TIERS[tier];
+          const colorType = COLOR_POOL[Math.floor(Math.random() * COLOR_POOL.length)];
+          const pair = SHIFT_PAIRS[Math.floor(Math.random() * SHIFT_PAIRS.length)];
+          return {
+            x, y,
+            baseR:       T.rMin + Math.random() * (T.rMax - T.rMin),
+            vx, vy,
+            baseAlpha:   T.baseAlpha,
+            breathPhase: Math.random() * Math.PI * 2,
+            breathRate:  0.28 + Math.random() * 0.85,
+            breathDepth: 0.42 + Math.random() * 0.36,
+            sizePhase:   Math.random() * Math.PI * 2,
+            sizeRate:    0.10 + Math.random() * 0.30,
+            colorType,
+            colorPhase:  Math.random() * Math.PI * 2,
+            colorRate:   0.05 + Math.random() * 0.13,
+            shiftFrom: pair[0], shiftTo: pair[1],
+            boostStartTime: 15 + Math.random() * 50,
+            boostDuration:   5 + Math.random() * 7,
+          };
+        }
+
         const particles: Particle[] = [];
-        for (const L of LAYERS) {
-          for (let i = 0; i < L.n; i++) {
-            const colorType = COLOR_POOL[Math.floor(Math.random() * COLOR_POOL.length)];
-            const pair = SHIFT_PAIRS[Math.floor(Math.random() * SHIFT_PAIRS.length)];
-            particles.push({
-              x: Math.random() * W, y: Math.random() * H,
-              baseR: L.rMin + Math.random() * (L.rMax - L.rMin),
-              vx: (Math.random() - 0.5) * 0.18 * L.spdMult,
-              vy: (Math.random() - 0.5) * 0.18 * L.spdMult,
-              baseAlpha:   L.baseAlpha,
-              breathPhase: Math.random() * Math.PI * 2,
-              breathRate:  0.28 + Math.random() * 0.85,
-              breathDepth: 0.42 + Math.random() * 0.36,
-              sizePhase:   Math.random() * Math.PI * 2,
-              sizeRate:    0.10 + Math.random() * 0.30,
-              colorType,
-              colorPhase:  Math.random() * Math.PI * 2,
-              colorRate:   0.05 + Math.random() * 0.13,
-              shiftFrom: pair[0], shiftTo: pair[1],
-              boostStartTime: 15 + Math.random() * 50,
-              boostDuration:  5  + Math.random() * 7,
-            });
+        for (const def of DEFS) {
+          const cx = def.cx * W, cy = def.cy * H;
+          for (const node of def.nodes) {
+            // Each node inherits the group drift + a tiny individual jitter so
+            // the shape breathes organically without dissolving quickly
+            const jx = (Math.random() - 0.5) * 0.016;
+            const jy = (Math.random() - 0.5) * 0.016;
+            particles.push(makeParticle(cx + node.dx, cy + node.dy, node.tier, def.vx + jx, def.vy + jy));
           }
         }
         const COUNT = particles.length;
@@ -243,19 +294,24 @@ const { title, description } = Astro.props;
           const breathVals = particles.map(p => breathVal(p, t));
 
           // — Connections — skipped on mobile (O(n²) is too costly) —
+          // Lines are trimmed to dot edges so they don't bleed through filled circles.
           if (!isMobile) {
             for (let i = 0; i < COUNT; i++) {
               for (let j = i + 1; j < COUNT; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
+                const dx = particles[j].x - particles[i].x;
+                const dy = particles[j].y - particles[i].y;
                 const d  = Math.sqrt(dx * dx + dy * dy);
                 if (d < MAX_DIST) {
                   const avgBreath = (breathVals[i] + breathVals[j]) * 0.5;
                   const avgAlpha  = (particles[i].baseAlpha + particles[j].baseAlpha) * 0.5;
                   const lineAlpha = avgAlpha * avgBreath * (1 - d / MAX_DIST) * 1.1;
+                  // Unit vector from i → j; trim each end by its dot's current radius
+                  const ux = dx / d, uy = dy / d;
+                  const ri = currentR(particles[i], t);
+                  const rj = currentR(particles[j], t);
                   ctx.beginPath();
-                  ctx.moveTo(particles[i].x, particles[i].y);
-                  ctx.lineTo(particles[j].x, particles[j].y);
+                  ctx.moveTo(particles[i].x + ux * ri, particles[i].y + uy * ri);
+                  ctx.lineTo(particles[j].x - ux * rj, particles[j].y - uy * rj);
                   ctx.strokeStyle = `rgba(17,17,16,${lineAlpha.toFixed(3)})`;
                   ctx.lineWidth = 0.5;
                   ctx.stroke();
