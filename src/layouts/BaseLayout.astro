@@ -62,13 +62,14 @@ const { title, description } = Astro.props;
           H = canvas.height = window.innerHeight;
         }
         resize();
-        // Debounce resize: iOS Safari fires resize as browser chrome hides/shows
-        // during scroll, which resets canvas.width/height and causes a visible flash.
-        let resizeTimer: ReturnType<typeof setTimeout>;
-        window.addEventListener('resize', () => {
-          clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(resize, 200);
-        }, { passive: true });
+        // iOS Safari fires 'resize' constantly as the address bar hides/shows during
+        // scroll — each event clears the canvas and causes a flash. On mobile we only
+        // need to resize on a true orientation change; on desktop, resize freely.
+        if (isMobile) {
+          window.addEventListener('orientationchange', () => setTimeout(resize, 300), { passive: true });
+        } else {
+          window.addEventListener('resize', resize, { passive: true });
+        }
 
         // ── Color primaries ──
         type RGB = [number, number, number];
@@ -138,16 +139,16 @@ const { title, description } = Astro.props;
           ]},
         ];
 
-        // Mobile: 3 simpler constellations (connections not drawn anyway)
+        // Mobile: 3 constellations — velocities ~5× desktop so movement is visible at 30fps
         const MOBILE_DEFS: CDef[] = [
-          { cx:0.25, cy:0.20, vx: 0.010, vy: 0.008, nodes: [
+          { cx:0.25, cy:0.20, vx: 0.052, vy: 0.038, nodes: [
             {dx:   0, dy: -48, tier:3}, {dx:  42, dy:  24, tier:1}, {dx: -42, dy:  24, tier:1},
           ]},
-          { cx:0.72, cy:0.50, vx:-0.009, vy: 0.010, nodes: [
+          { cx:0.72, cy:0.50, vx:-0.046, vy: 0.050, nodes: [
             {dx: -38, dy: -38, tier:1}, {dx:  38, dy: -38, tier:2},
             {dx:  38, dy:  38, tier:1}, {dx: -38, dy:  38, tier:3},
           ]},
-          { cx:0.30, cy:0.78, vx: 0.011, vy:-0.007, nodes: [
+          { cx:0.30, cy:0.78, vx: 0.055, vy:-0.040, nodes: [
             {dx:   0, dy: -50, tier:1}, {dx:  45, dy:   0, tier:3},
             {dx:   0, dy:  40, tier:1}, {dx: -45, dy:   0, tier:2},
           ]},
@@ -184,8 +185,9 @@ const { title, description } = Astro.props;
           for (const node of def.nodes) {
             // Each node inherits the group drift + a tiny individual jitter so
             // the shape breathes organically without dissolving quickly
-            const jx = (Math.random() - 0.5) * 0.016;
-            const jy = (Math.random() - 0.5) * 0.016;
+            const jitterScale = isMobile ? 0.030 : 0.016;
+            const jx = (Math.random() - 0.5) * jitterScale;
+            const jy = (Math.random() - 0.5) * jitterScale;
             particles.push(makeParticle(cx + node.dx, cy + node.dy, node.tier, def.vx + jx, def.vy + jy));
           }
         }
