@@ -56,11 +56,9 @@ const { title, description } = Astro.props;
         const ctx = canvas.getContext('2d')!;
 
         let W = 0, H = 0;
-        let needsTextZoneUpdate = true; // declared before resize() is called
         function resize() {
           W = canvas.width  = window.innerWidth;
           H = canvas.height = window.innerHeight;
-          needsTextZoneUpdate = true;
         }
         resize();
         window.addEventListener('resize', resize, { passive: true });
@@ -150,23 +148,6 @@ const { title, description } = Astro.props;
           { x: W*0.88, y: H*0.88, r: 260, vx: -0.022, vy: -0.018, rgba: 'rgba(178,48,22,0.07)'  },
         ];
 
-        // ── Text zones — queried lazily on scroll/resize ──
-        let textZones: DOMRect[] = [];
-        function updateTextZones() {
-          textZones = Array.from(
-            document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,.highlight-card')
-          ).map(el => (el as Element).getBoundingClientRect())
-           .filter(r => r.width > 0 && r.height > 0);
-        }
-        window.addEventListener('scroll', () => { needsTextZoneUpdate = true; }, { passive: true });
-        function inTextZone(x: number, y: number): boolean {
-          for (const r of textZones) {
-            if (x >= r.left - 8 && x <= r.right  + 8 &&
-                y >= r.top  - 8 && y <= r.bottom + 8) return true;
-          }
-          return false;
-        }
-
         const MAX_DIST = 130;
 
         // ── Helpers ──
@@ -213,8 +194,6 @@ const { title, description } = Astro.props;
         function frame(now: number) {
           const t = now / 1000;
           frameCount++;
-
-          if (needsTextZoneUpdate) { needsTextZoneUpdate = false; updateTextZones(); }
 
           ctx.clearRect(0, 0, W, H);
 
@@ -301,23 +280,16 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Classify by text zone —
-          const normalIdx: number[] = [];
-          const dimIdx:    number[] = [];
+          // — Draw trails —
           for (let i = 0; i < COUNT; i++) {
-            (inTextZone(particles[i].x, particles[i].y) ? dimIdx : normalIdx).push(i);
-          }
-
-          // — Draw trails (normal dots only) —
-          for (const i of normalIdx) {
             const p = particles[i];
             if (p.trailAlpha < 0.01 || p.trail.length < 2) continue;
             const len = p.trail.length;
             const r0  = currentR(p, t);
             for (let k = 0; k < len; k++) {
-              const prog  = k / (len - 1);             // 0=oldest, 1=head
-              const tA    = p.trailAlpha * prog * prog * p.baseAlpha * breathVals[i] * 0.9;
-              const tR    = Math.max(0.3, r0 * prog * 0.65);
+              const prog = k / (len - 1);
+              const tA   = p.trailAlpha * prog * prog * p.baseAlpha * breathVals[i] * 0.9;
+              const tR   = Math.max(0.3, r0 * prog * 0.65);
               if (tA > 0.004) {
                 ctx.beginPath();
                 ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
@@ -327,27 +299,13 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Draw normal dots —
-          for (const i of normalIdx) {
+          // — Draw dots —
+          for (let i = 0; i < COUNT; i++) {
             const p = particles[i];
             ctx.beginPath();
             ctx.arc(p.x, p.y, currentR(p, t), 0, Math.PI * 2);
             ctx.fillStyle = dotColor(p, t, p.baseAlpha * breathVals[i]);
             ctx.fill();
-          }
-
-          // — Draw dim dots (under text) — blurred and faint so text stays clear —
-          if (dimIdx.length > 0) {
-            ctx.save();
-            ctx.filter = 'blur(1.5px)';
-            for (const i of dimIdx) {
-              const p = particles[i];
-              ctx.beginPath();
-              ctx.arc(p.x, p.y, currentR(p, t), 0, Math.PI * 2);
-              ctx.fillStyle = dotColor(p, t, p.baseAlpha * breathVals[i] * 0.18);
-              ctx.fill();
-            }
-            ctx.restore();
           }
 
           // — Move particles —
@@ -363,7 +321,6 @@ const { title, description } = Astro.props;
           requestAnimationFrame(frame);
         }
 
-        updateTextZones();
         requestAnimationFrame(frame);
       })();
     </script>
