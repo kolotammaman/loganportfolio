@@ -137,15 +137,21 @@ const { title, description } = Astro.props;
         }
         const COUNT = particles.length;
 
-        // ── Blobs ──
-        interface Blob { x:number; y:number; r:number; vx:number; vy:number; rgba:string; }
+        // ── Blobs — with occasional slow pulse ──
+        type BlobPulse = 'idle' | 'swell' | 'settle';
+        interface Blob {
+          x:number; y:number; r:number; vx:number; vy:number;
+          rgb: string; baseA: number;  // color components split for pulse math
+          pulseA: number;              // current multiplier (1 = normal)
+          pulseState: BlobPulse; pulseStart: number; nextPulse: number;
+        }
         const blobs: Blob[] = [
-          { x: W*0.10, y: H*0.25, r: 340, vx:  0.020, vy:  0.028, rgba: 'rgba(28,53,87,0.10)'   },
-          { x: W*0.80, y: H*0.52, r: 400, vx: -0.024, vy:  0.018, rgba: 'rgba(18,38,72,0.07)'   },
-          { x: W*0.50, y: H*0.76, r: 270, vx:  0.026, vy: -0.022, rgba: 'rgba(196,149,58,0.09)' },
-          { x: W*0.72, y: H*0.12, r: 310, vx: -0.018, vy:  0.026, rgba: 'rgba(215,75,15,0.09)'  },
-          { x: W*0.28, y: H*0.65, r: 230, vx:  0.030, vy:  0.020, rgba: 'rgba(225,115,25,0.08)' },
-          { x: W*0.88, y: H*0.88, r: 260, vx: -0.022, vy: -0.018, rgba: 'rgba(178,48,22,0.07)'  },
+          { x:W*0.10,y:H*0.25,r:340,vx: 0.020,vy: 0.028,rgb:'28,53,87',  baseA:0.10,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:40 +Math.random()*80 },
+          { x:W*0.80,y:H*0.52,r:400,vx:-0.024,vy: 0.018,rgb:'18,38,72',  baseA:0.07,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:60 +Math.random()*90 },
+          { x:W*0.50,y:H*0.76,r:270,vx: 0.026,vy:-0.022,rgb:'196,149,58',baseA:0.09,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:50 +Math.random()*70 },
+          { x:W*0.72,y:H*0.12,r:310,vx:-0.018,vy: 0.026,rgb:'215,75,15', baseA:0.09,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:70 +Math.random()*80 },
+          { x:W*0.28,y:H*0.65,r:230,vx: 0.030,vy: 0.020,rgb:'225,115,25',baseA:0.08,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:45 +Math.random()*75 },
+          { x:W*0.88,y:H*0.88,r:260,vx:-0.022,vy:-0.018,rgb:'178,48,22', baseA:0.07,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:55 +Math.random()*85 },
         ];
 
         const MAX_DIST = 130;
@@ -155,7 +161,12 @@ const { title, description } = Astro.props;
           return 1 - p.breathDepth + p.breathDepth * (Math.sin(t * p.breathRate + p.breathPhase) * 0.5 + 0.5);
         }
         function currentR(p: Particle, t: number): number {
-          return p.baseR * (0.62 + 0.38 * (Math.sin(t * p.sizeRate + p.sizePhase) * 0.5 + 0.5));
+          // Two incommensurable sine waves — their interference creates an irregular,
+          // organic pulse that never exactly repeats, unlike a single clean sine.
+          const s1 = Math.sin(t * p.sizeRate + p.sizePhase);
+          const s2 = Math.sin(t * p.sizeRate * 2.414 + p.sizePhase * 1.31); // √2+1 keeps them out of sync
+          const combined = s1 * 0.68 + s2 * 0.32;                           // weighted blend
+          return p.baseR * (0.65 + 0.35 * (combined * 0.5 + 0.5));
         }
         function lerpRGB(a: RGB, b: RGB, mix: number): RGB {
           return [
@@ -197,10 +208,24 @@ const { title, description } = Astro.props;
 
           ctx.clearRect(0, 0, W, H);
 
-          // — Blobs —
+          // — Blobs — with pulse state machine —
           for (const b of blobs) {
+            // Pulse: idle → swell (10s to 2.2×) → settle (16s back to 1×) → idle
+            if (b.pulseState === 'idle' && t >= b.nextPulse) {
+              b.pulseState = 'swell'; b.pulseStart = t;
+            } else if (b.pulseState === 'swell') {
+              b.pulseA = 1 + 1.2 * Math.min(1, (t - b.pulseStart) / 10);
+              if (t - b.pulseStart >= 10) { b.pulseState = 'settle'; b.pulseStart = t; }
+            } else if (b.pulseState === 'settle') {
+              b.pulseA = 2.2 - 1.2 * Math.min(1, (t - b.pulseStart) / 16);
+              if (t - b.pulseStart >= 16) {
+                b.pulseA = 1; b.pulseState = 'idle';
+                b.nextPulse = t + 60 + Math.random() * 90; // 60–150s until next pulse
+              }
+            }
+            const alpha = (b.baseA * b.pulseA).toFixed(3);
             const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-            g.addColorStop(0, b.rgba);
+            g.addColorStop(0, `rgba(${b.rgb},${alpha})`);
             g.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.beginPath();
             ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
@@ -248,13 +273,11 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Record trail positions every 3 frames —
-          if (frameCount % 3 === 0) {
-            for (const p of particles) {
-              if (p.trailState !== 'idle') {
-                p.trail.push({ x: p.x, y: p.y });
-                if (p.trail.length > 28) p.trail.shift();
-              }
+          // — Record trail positions every frame for smooth shooting-star tails —
+          for (const p of particles) {
+            if (p.trailState !== 'idle') {
+              p.trail.push({ x: p.x, y: p.y });
+              if (p.trail.length > 55) p.trail.shift();
             }
           }
 
@@ -280,17 +303,19 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Draw trails —
+          // — Draw trails — slow-motion shooting star —
           for (let i = 0; i < COUNT; i++) {
             const p = particles[i];
             if (p.trailAlpha < 0.01 || p.trail.length < 2) continue;
             const len = p.trail.length;
             const r0  = currentR(p, t);
             for (let k = 0; k < len; k++) {
-              const prog = k / (len - 1);
-              const tA   = p.trailAlpha * prog * prog * p.baseAlpha * breathVals[i] * 0.9;
-              const tR   = Math.max(0.3, r0 * prog * 0.65);
-              if (tA > 0.004) {
+              const prog = k / (len - 1);          // 0 = oldest tail, 1 = head
+              // prog^1.3: softer falloff than prog^2 → longer visible trail
+              const tA = p.trailAlpha * Math.pow(prog, 1.3) * 0.70;
+              // Head is nearly full dot size; tail tapers to a fine point
+              const tR = Math.max(0.4, r0 * (0.12 + 0.88 * prog));
+              if (tA > 0.006) {
                 ctx.beginPath();
                 ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
                 ctx.fillStyle = dotColor(p, t, tA);
