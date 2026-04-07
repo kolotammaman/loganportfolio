@@ -322,29 +322,40 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Draw trails —
-          // Skip the most-recent positions (they sit on top of the dot and darken it).
-          // How many to skip scales with the dot's current radius so it works for all sizes.
-          // Opacity uses prog-based falloff (tail fades out), the dot itself is unaffected.
+          // — Draw trails as hollow rings —
+          // Each trail position renders as a stroked circle (ring) at the dot's full
+          // radius — same size, same color, opacity fades toward the tail.
+          // Rings can't darken the dot's fill because they have no fill of their own.
+          // Fade-out sweeps from the tail inward so it looks like ink dissolving.
           for (let i = 0; i < COUNT; i++) {
             const p = particles[i];
             if (p.trailAlpha < 0.01 || p.trail.length < 2) continue;
-            const len      = p.trail.length;
-            const r0       = currentR(p, t);
-            const skipHead = Math.max(5, Math.ceil(r0 * 1.5)); // skip positions within ~1.5r of dot
+            const len = p.trail.length;
+            const r0  = currentR(p, t);
+            // Skip the most-recent positions so the ring doesn't sit right on the dot edge
+            const skipHead = Math.max(4, Math.ceil(r0 * 0.5));
             const drawLen  = len - skipHead;
             if (drawLen < 2) continue;
-            const dotA = p.baseAlpha * breathVals[i];
+            const dotA      = p.baseAlpha * breathVals[i];
+            const strokeW   = Math.min(r0 * 0.18, 1.6); // ring thickness scales with dot size
+
             for (let k = 0; k < drawLen; k++) {
-              const prog = k / (drawLen - 1);            // 0 = tail, 1 = near-head (not at dot)
-              const tA   = p.trailAlpha * Math.pow(prog, 1.2) * dotA;
-              const tR   = Math.max(0.3, r0 * Math.pow(prog, 0.75));
-              if (tA > 0.003) {
-                ctx.beginPath();
-                ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
-                ctx.fillStyle = dotColor(p, t, tA);
-                ctx.fill();
-              }
+              const prog = k / (drawLen - 1); // 0 = oldest tail, 1 = near-head
+
+              // Fadeout: sweep wipe from tail inward so the oldest rings vanish first,
+              // creating a natural "ink being absorbed" disappearance
+              const wipe = (p.trailState === 'fadeout')
+                ? Math.max(0, Math.min(1, (prog - (1 - p.trailAlpha)) / 0.18))
+                : p.trailAlpha;
+
+              const ringA = Math.pow(prog, 0.7) * wipe * dotA;
+              if (ringA < 0.004) continue;
+
+              ctx.beginPath();
+              ctx.arc(p.trail[k].x, p.trail[k].y, r0, 0, Math.PI * 2);
+              ctx.strokeStyle = dotColor(p, t, ringA);
+              ctx.lineWidth   = strokeW;
+              ctx.stroke();
             }
           }
 
