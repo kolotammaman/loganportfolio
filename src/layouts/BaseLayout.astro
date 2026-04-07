@@ -97,9 +97,6 @@ const { title, description } = Astro.props;
           { n:  3, rMin: 7.0, rMax: 13.0, spdMult: 1.20, baseAlpha: 0.40 }, // feature
         ];
 
-        interface TrailPos { x: number; y: number; }
-        type TrailState = 'idle' | 'fadein' | 'active' | 'fadeout';
-
         interface Particle {
           x: number; y: number; baseR: number;
           vx: number; vy: number; baseAlpha: number;
@@ -107,10 +104,6 @@ const { title, description } = Astro.props;
           sizePhase:   number; sizeRate:   number;
           colorType: ColorType; colorPhase: number; colorRate: number;
           shiftFrom: RGB; shiftTo: RGB;
-          // Trail
-          trail: TrailPos[]; trailAlpha: number; trailState: TrailState;
-          trailFadeStart: number; trailActiveUntil: number;
-          // Speed boost
           boostStartTime: number; boostDuration: number;
         }
 
@@ -134,8 +127,6 @@ const { title, description } = Astro.props;
               colorPhase:  Math.random() * Math.PI * 2,
               colorRate:   0.05 + Math.random() * 0.13,
               shiftFrom: pair[0], shiftTo: pair[1],
-              trail: [], trailAlpha: 0, trailState: 'idle',
-              trailFadeStart: 0, trailActiveUntil: 0,
               boostStartTime: 15 + Math.random() * 50,
               boostDuration:  5  + Math.random() * 7,
             });
@@ -205,8 +196,6 @@ const { title, description } = Astro.props;
           return 1 + 0.35 * Math.sin(Math.PI * elapsed / p.boostDuration);
         }
 
-        let frameCount = 0;
-        let nextTrailCheck = 3;
         let lastFrameTime = 0;
         const FRAME_MIN = isMobile ? 1000 / 30 : 0; // 30fps cap on mobile
 
@@ -217,7 +206,6 @@ const { title, description } = Astro.props;
           }
           lastFrameTime = now;
           const t = now / 1000;
-          frameCount++;
 
           ctx.clearRect(0, 0, W, H);
 
@@ -252,52 +240,6 @@ const { title, description } = Astro.props;
             if (b.y > H + b.r) b.y = -b.r;
           }
 
-          // — Trail scheduling: 1–3 trails active at a time —
-          // Biased toward larger dots (stochastic sort by baseR so big dots get picked often)
-          if (t > nextTrailCheck) {
-            nextTrailCheck = t + 2 + Math.random() * 4;
-            const active = particles.filter(p => p.trailState !== 'idle').length;
-            if (active < 3 && Math.random() < 0.75) {
-              const numNew = Math.random() < 0.35 ? 2 : 1;
-              const idle = particles.filter(p => p.trailState === 'idle');
-              // Stochastic sort: multiply baseR by a random factor so big dots bubble up
-              // more often but it's not deterministic — still feels organic
-              idle.sort((a, b) =>
-                (b.baseR * (0.4 + Math.random())) - (a.baseR * (0.4 + Math.random()))
-              );
-              for (let k = 0; k < Math.min(numNew, idle.length); k++) {
-                idle[k].trailState       = 'fadein';
-                idle[k].trailFadeStart   = t;
-                idle[k].trailActiveUntil = t + 8 + Math.random() * 12; // 8–20s active
-                idle[k].trail            = [];
-                idle[k].trailAlpha       = 0;
-              }
-            }
-          }
-
-          // — Trail state machine —
-          for (const p of particles) {
-            if (p.trailState === 'fadein') {
-              p.trailAlpha = Math.min(1, (t - p.trailFadeStart) / 1.8);
-              if (p.trailAlpha >= 1) p.trailState = 'active';
-            } else if (p.trailState === 'active') {
-              p.trailAlpha = 1;
-              if (t >= p.trailActiveUntil) { p.trailState = 'fadeout'; p.trailFadeStart = t; }
-            } else if (p.trailState === 'fadeout') {
-              p.trailAlpha = Math.max(0, 1 - (t - p.trailFadeStart) / 5); // 5s slow ink fade
-              if (p.trailAlpha <= 0) { p.trailState = 'idle'; p.trail = []; }
-            }
-          }
-
-          // — Record trail positions — stop during fadeout so the stroke freezes in place —
-          const TRAIL_MAX = isMobile ? 60 : 120;
-          for (const p of particles) {
-            if (p.trailState === 'fadein' || p.trailState === 'active') {
-              p.trail.push({ x: p.x, y: p.y });
-              if (p.trail.length > TRAIL_MAX) p.trail.shift();
-            }
-          }
-
           const breathVals = particles.map(p => breathVal(p, t));
 
           // — Connections — skipped on mobile (O(n²) is too costly) —
@@ -319,43 +261,6 @@ const { title, description } = Astro.props;
                   ctx.stroke();
                 }
               }
-            }
-          }
-
-          // — Draw trails as hollow rings —
-          // Each trail position renders as a stroked circle (ring) at the dot's full
-          // radius — same size, same color, opacity fades toward the tail.
-          // Rings can't darken the dot's fill because they have no fill of their own.
-          // Fade-out sweeps from the tail inward so it looks like ink dissolving.
-          for (let i = 0; i < COUNT; i++) {
-            const p = particles[i];
-            if (p.trailAlpha < 0.01 || p.trail.length < 2) continue;
-            const len = p.trail.length;
-            const r0  = currentR(p, t);
-            // Skip the most-recent positions so the ring doesn't sit right on the dot edge
-            const skipHead = Math.max(4, Math.ceil(r0 * 0.5));
-            const drawLen  = len - skipHead;
-            if (drawLen < 2) continue;
-            const dotA      = p.baseAlpha * breathVals[i];
-            const strokeW   = Math.min(r0 * 0.18, 1.6); // ring thickness scales with dot size
-
-            for (let k = 0; k < drawLen; k++) {
-              const prog = k / (drawLen - 1); // 0 = oldest tail, 1 = near-head
-
-              // Fadeout: sweep wipe from tail inward so the oldest rings vanish first,
-              // creating a natural "ink being absorbed" disappearance
-              const wipe = (p.trailState === 'fadeout')
-                ? Math.max(0, Math.min(1, (prog - (1 - p.trailAlpha)) / 0.18))
-                : p.trailAlpha;
-
-              const ringA = Math.pow(prog, 0.7) * wipe * dotA;
-              if (ringA < 0.004) continue;
-
-              ctx.beginPath();
-              ctx.arc(p.trail[k].x, p.trail[k].y, r0, 0, Math.PI * 2);
-              ctx.strokeStyle = dotColor(p, t, ringA);
-              ctx.lineWidth   = strokeW;
-              ctx.stroke();
             }
           }
 
