@@ -253,22 +253,24 @@ const { title, description } = Astro.props;
           }
 
           // — Trail scheduling: 1–3 trails active at a time —
+          // Biased toward larger dots (stochastic sort by baseR so big dots get picked often)
           if (t > nextTrailCheck) {
             nextTrailCheck = t + 2 + Math.random() * 4;
             const active = particles.filter(p => p.trailState !== 'idle').length;
             if (active < 3 && Math.random() < 0.75) {
               const numNew = Math.random() < 0.35 ? 2 : 1;
               const idle = particles.filter(p => p.trailState === 'idle');
-              for (let k = idle.length - 1; k > 0; k--) {
-                const j = Math.floor(Math.random() * (k + 1));
-                [idle[k], idle[j]] = [idle[j], idle[k]];
-              }
+              // Stochastic sort: multiply baseR by a random factor so big dots bubble up
+              // more often but it's not deterministic — still feels organic
+              idle.sort((a, b) =>
+                (b.baseR * (0.4 + Math.random())) - (a.baseR * (0.4 + Math.random()))
+              );
               for (let k = 0; k < Math.min(numNew, idle.length); k++) {
-                idle[k].trailState      = 'fadein';
-                idle[k].trailFadeStart  = t;
-                idle[k].trailActiveUntil = t + 4 + Math.random() * 9;
-                idle[k].trail           = [];
-                idle[k].trailAlpha      = 0;
+                idle[k].trailState       = 'fadein';
+                idle[k].trailFadeStart   = t;
+                idle[k].trailActiveUntil = t + 8 + Math.random() * 12; // 8–20s active
+                idle[k].trail            = [];
+                idle[k].trailAlpha       = 0;
               }
             }
           }
@@ -282,15 +284,15 @@ const { title, description } = Astro.props;
               p.trailAlpha = 1;
               if (t >= p.trailActiveUntil) { p.trailState = 'fadeout'; p.trailFadeStart = t; }
             } else if (p.trailState === 'fadeout') {
-              p.trailAlpha = Math.max(0, 1 - (t - p.trailFadeStart) / 2.5);
+              p.trailAlpha = Math.max(0, 1 - (t - p.trailFadeStart) / 5); // 5s slow ink fade
               if (p.trailAlpha <= 0) { p.trailState = 'idle'; p.trail = []; }
             }
           }
 
-          // — Record trail positions every frame —
+          // — Record trail positions — stop during fadeout so the stroke freezes in place —
           const TRAIL_MAX = isMobile ? 60 : 120;
           for (const p of particles) {
-            if (p.trailState !== 'idle') {
+            if (p.trailState === 'fadein' || p.trailState === 'active') {
               p.trail.push({ x: p.x, y: p.y });
               if (p.trail.length > TRAIL_MAX) p.trail.shift();
             }
@@ -320,23 +322,29 @@ const { title, description } = Astro.props;
             }
           }
 
-          // — Draw trails — opacity constant (same as the dot), only size tapers —
+          // — Draw trails —
+          // Skip the most-recent positions (they sit on top of the dot and darken it).
+          // How many to skip scales with the dot's current radius so it works for all sizes.
+          // Opacity uses prog-based falloff (tail fades out), the dot itself is unaffected.
           for (let i = 0; i < COUNT; i++) {
             const p = particles[i];
             if (p.trailAlpha < 0.01 || p.trail.length < 2) continue;
-            const len  = p.trail.length;
-            const r0   = currentR(p, t);
-            const dotA = p.baseAlpha * breathVals[i]; // same opacity as the live dot
-            for (let k = 0; k < len; k++) {
-              const prog = k / (len - 1);               // 0 = oldest tail end, 1 = head
-              // Opacity: constant at the dot's own level, only modulated by trail fade-in/out
-              const tA = p.trailAlpha * dotA;
-              // Size: gentle power-curve taper — wide near head, fine point at tail
-              const tR = Math.max(0.3, r0 * Math.pow(prog, 0.75));
-              ctx.beginPath();
-              ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
-              ctx.fillStyle = dotColor(p, t, tA);
-              ctx.fill();
+            const len      = p.trail.length;
+            const r0       = currentR(p, t);
+            const skipHead = Math.max(5, Math.ceil(r0 * 1.5)); // skip positions within ~1.5r of dot
+            const drawLen  = len - skipHead;
+            if (drawLen < 2) continue;
+            const dotA = p.baseAlpha * breathVals[i];
+            for (let k = 0; k < drawLen; k++) {
+              const prog = k / (drawLen - 1);            // 0 = tail, 1 = near-head (not at dot)
+              const tA   = p.trailAlpha * Math.pow(prog, 1.2) * dotA;
+              const tR   = Math.max(0.3, r0 * Math.pow(prog, 0.75));
+              if (tA > 0.003) {
+                ctx.beginPath();
+                ctx.arc(p.trail[k].x, p.trail[k].y, tR, 0, Math.PI * 2);
+                ctx.fillStyle = dotColor(p, t, tA);
+                ctx.fill();
+              }
             }
           }
 
