@@ -139,23 +139,6 @@ const { title, description } = Astro.props;
           ]},
         ];
 
-        // Mobile: 3 constellations — higher velocities for visible movement at 30fps
-        const MOBILE_DEFS: CDef[] = [
-          { cx:0.25, cy:0.20, vx: 0.10, vy: 0.07, nodes: [
-            {dx:   0, dy: -48, tier:3}, {dx:  42, dy:  24, tier:1}, {dx: -42, dy:  24, tier:1},
-          ]},
-          { cx:0.72, cy:0.50, vx:-0.09, vy: 0.10, nodes: [
-            {dx: -38, dy: -38, tier:1}, {dx:  38, dy: -38, tier:2},
-            {dx:  38, dy:  38, tier:1}, {dx: -38, dy:  38, tier:3},
-          ]},
-          { cx:0.30, cy:0.78, vx: 0.11, vy:-0.08, nodes: [
-            {dx:   0, dy: -50, tier:1}, {dx:  45, dy:   0, tier:3},
-            {dx:   0, dy:  40, tier:1}, {dx: -45, dy:   0, tier:2},
-          ]},
-        ];
-
-        const DEFS = isMobile ? MOBILE_DEFS : DESKTOP_DEFS;
-
         function makeParticle(x: number, y: number, tier: number, vx: number, vy: number): Particle {
           const T = TIERS[tier];
           const colorType = COLOR_POOL[Math.floor(Math.random() * COLOR_POOL.length)];
@@ -180,15 +163,33 @@ const { title, description } = Astro.props;
         }
 
         const particles: Particle[] = [];
-        for (const def of DEFS) {
-          const cx = def.cx * W, cy = def.cy * H;
-          for (const node of def.nodes) {
-            // Each node inherits the group drift + a tiny individual jitter so
-            // the shape breathes organically without dissolving quickly
-            const jitterScale = isMobile ? 0.030 : 0.016;
-            const jx = (Math.random() - 0.5) * jitterScale;
-            const jy = (Math.random() - 0.5) * jitterScale;
-            particles.push(makeParticle(cx + node.dx, cy + node.dy, node.tier, def.vx + jx, def.vy + jy));
+        if (isMobile) {
+          // Mobile: fully random scatter + independent velocities.
+          // Constellations look rigid on small screens; random drift feels alive.
+          const ML = [
+            { n:4, tier:0, spd:0.10 },
+            { n:5, tier:1, spd:0.18 },
+            { n:3, tier:2, spd:0.28 },
+            { n:2, tier:3, spd:0.22 },
+          ];
+          for (const L of ML) {
+            for (let i = 0; i < L.n; i++) {
+              particles.push(makeParticle(
+                Math.random() * W, Math.random() * H, L.tier,
+                (Math.random() - 0.5) * L.spd,
+                (Math.random() - 0.5) * L.spd,
+              ));
+            }
+          }
+        } else {
+          // Desktop: constellation groups — geometric shapes that drift slowly together
+          for (const def of DESKTOP_DEFS) {
+            const cx = def.cx * W, cy = def.cy * H;
+            for (const node of def.nodes) {
+              const jx = (Math.random() - 0.5) * 0.016;
+              const jy = (Math.random() - 0.5) * 0.016;
+              particles.push(makeParticle(cx + node.dx, cy + node.dy, node.tier, def.vx + jx, def.vy + jy));
+            }
           }
         }
         const COUNT = particles.length;
