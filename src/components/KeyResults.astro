@@ -3,12 +3,12 @@ const results = [
   {
     number: '01',
     label: 'SOP Authorship',
-    description: 'Wrote standard operating procedures that standardized job roles and daily workflows across clinical teams and market-level operations.',
+    description: 'Wrote <span class="font-medium text-text">standard operating procedures</span> that standardized job roles and daily workflows across clinical teams and market-level operations.',
   },
   {
     number: '02',
     label: 'Workflow and Checklist Design',
-    description: 'Designed pre-staging systems, closing checklists, and process documentation now used daily by active clinic teams to maintain operational consistency.',
+    description: 'Designed <span class="font-medium text-text">pre-staging systems</span>, closing checklists, and process documentation now used daily by active clinic teams to maintain operational consistency.',
   },
   {
     number: '03',
@@ -50,9 +50,7 @@ const results = [
           <h3 class="font-heading font-semibold text-xl text-primary mb-3">
             {result.label}
           </h3>
-          <p class="text-text-secondary text-sm leading-relaxed" style="font-family: var(--font-body);">
-            {result.description}
-          </p>
+          <p class="text-text-secondary text-sm leading-relaxed" style="font-family: var(--font-body);" set:html={result.description}></p>
         </div>
       ))}
     </div>
