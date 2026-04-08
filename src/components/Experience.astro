@@ -7,8 +7,10 @@ const jobs = [
     period: 'May 2023 to Present',
     current: true,
     bullets: [
-      'Manage daily clinic flow across multiple specialties by coordinating instrument readiness, kit staging, and schedule alignment. Providers never wait on supplies.',
-      'Maintained a 15-minute turnaround on high-priority items by building a pre-staging system around sterilization cycle timing.',
+      'Coordinate systems and functions across <strong>5 specialty clinics</strong>, serving <strong>200+ dental students</strong>, <strong>30+ residents</strong>, and <strong>30+ faculty</strong> daily. Zero compliance breaches across all clinical operations.',
+      'Maintained a <strong>15-minute</strong> turnaround on high-priority items by building a pre-staging system around sterilization cycle timing.',
+      'Sterilized, tracked, and accounted for <strong>1,000+ unique dental instruments</strong> across morning and afternoon sessions.',
+      'Cross-train new staff regularly across <strong>5 specialty clinics</strong>, each with distinct instrumentation and workflow requirements.',
       'Serve as the first point of contact for residents and faculty under time pressure. I anticipate needs, resolve issues quickly, and keep communication accurate.',
       'Produce and maintain clinic documentation including SOPs, signage, checklists, and training materials managed through version-controlled workflows.',
       'Coordinate cross-clinic sourcing and vendor substitutions to prevent stockouts, with proactive updates to any teams affected.',
@@ -26,6 +28,18 @@ const jobs = [
       'Resolved high-volume customer issues and maintained a running log of problems and resolutions for team reference.',
       'Wrote standard operating procedures that restructured job roles and brought clarity to operations across the market.',
       'Promoted from Packing and Delivery Associate to Operations Associate within three months of starting.',
+    ],
+  },
+  {
+    title: 'Young Adult Leadership Committee / Men\'s Group Leader',
+    company: 'Saint Agatha-Saint James Catholic Church',
+    location: 'Philadelphia, PA',
+    period: 'Volunteer, 2023 to Present',
+    current: false,
+    bullets: [
+      'Produced a <strong>sold-out murder mystery event for 100+ paid attendees</strong>: wrote the original script from scratch, designed <strong>9 unique characters</strong>, directed actors, oversaw costume and stage design, managed lighting, secured and paid a live jazz band, and handled all venue logistics. No outside event management support.',
+      'Coordinated marketing, ticket sales, and volunteer staffing end-to-end.',
+      'Leads a weekly men\'s group: curates discussion topics and manages ongoing programming.',
     ],
   },
 ];
@@ -75,7 +89,7 @@ const jobs = [
               {job.bullets.map((bullet) => (
                 <li class="flex items-start gap-3 text-text-secondary">
                   <span class="w-1 h-1 rounded-full bg-accent/60 shrink-0 mt-2.5" aria-hidden="true" />
-                  <span class="text-sm leading-relaxed">{bullet}</span>
+                  <span class="text-sm leading-relaxed" set:html={bullet}></span>
                 </li>
               ))}
             </ul>
