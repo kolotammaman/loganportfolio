@@ -27,8 +27,9 @@ const skillCategories = [
   <div class="max-w-6xl mx-auto px-6">
 
     <!-- Section label -->
-    <div class="reveal mb-14">
-      <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-body);">
+    <div class="reveal mb-14 section-header">
+      <span class="section-ghost-num" aria-hidden="true">04</span>
+      <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-mono);">
         04 / Skills
       </p>
       <h2 id="skills-heading" class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-primary leading-tight">
@@ -53,7 +54,9 @@ const skillCategories = [
           <ul class="space-y-2.5" role="list">
             {category.skills.map((skill) => (
               <li class="flex items-center gap-2.5 text-text-secondary text-sm" style="font-family: var(--font-body);">
-                <span class="w-1 h-1 rounded-full bg-accent/50 shrink-0" aria-hidden="true" />
+                <svg class="w-2 h-2 text-accent-gold/70 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+                </svg>
                 {skill}
               </li>
             ))}

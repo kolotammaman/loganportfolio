@@ -1,0 +1,29 @@
+---
+// Editorial running-head band — slow uppercase marquee between sections.
+const items = [
+  'Project & Program Operations',
+  'Zero Compliance Breaches',
+  'Penn Dental Medicine',
+  '1,000+ Instruments Daily',
+  'SOP Authorship',
+  'Cross-Functional Coordination',
+  'Philadelphia, PA',
+];
+---
+
+<div class="ticker border-t border-border py-4 bg-bg-card/40" aria-hidden="true">
+  <div class="ticker-track">
+    {[0, 1].map(() => (
+      <div class="flex shrink-0 items-center">
+        {items.map((item) => (
+          <span class="flex items-center whitespace-nowrap text-text-muted text-xs font-medium tracking-[0.22em] uppercase" style="font-family: var(--font-mono);">
+            <span class="px-6">{item}</span>
+            <svg class="w-2.5 h-2.5 text-accent-gold" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+            </svg>
+          </span>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>

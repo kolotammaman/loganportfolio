@@ -9,7 +9,7 @@
     aria-hidden="true"
   ></div>
   <div
-    class="hero-float-inner hidden md:block absolute -top-48 -right-48 w-[480px] h-[480px] rounded-full border border-border/40 pointer-events-none"
+    class="hero-float-inner hidden md:block absolute -top-48 -right-48 w-[480px] h-[480px] rounded-full border border-dashed border-border/60 pointer-events-none"
     aria-hidden="true"
   ></div>
 
@@ -23,18 +23,36 @@
         <!-- Status pill -->
         <div class="reveal inline-flex items-center gap-2.5 px-4 py-1.5 border border-border bg-bg-card mb-12 rounded-sm">
           <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" aria-hidden="true"></span>
-          <span class="text-text-muted font-medium text-xs tracking-[0.15em] uppercase" style="font-family: var(--font-body);">Open to Opportunities</span>
+          <span class="text-text-muted font-medium text-xs tracking-[0.15em] uppercase" style="font-family: var(--font-mono);">Open to Opportunities</span>
         </div>
 
         <!-- Name — editorial display serif -->
         <h1 class="reveal reveal-delay-1 font-heading font-bold leading-[1] tracking-tight text-primary mb-8 whitespace-nowrap"
             style="font-size: clamp(2rem, 5.5vw, 5rem);">
-          Logan Moseley.
+          Logan
+          <span class="relative inline-block">
+            Moseley.
+            <!-- Hand-drawn gold underline — draws itself in after the name reveals -->
+            <svg
+              class="ink-underline absolute left-0 -bottom-[0.14em] w-full h-[0.18em] overflow-visible"
+              viewBox="0 0 300 18"
+              preserveAspectRatio="none"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 12 C 60 4, 150 16, 296 7"
+                stroke="var(--color-accent-gold)"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
         </h1>
 
-        <!-- Role — all-caps Inter -->
+        <!-- Role — all-caps typewriter mono -->
         <p class="reveal reveal-delay-2 text-text-muted text-sm font-medium tracking-[0.2em] uppercase mb-5"
-           style="font-family: var(--font-body);">
+           style="font-family: var(--font-mono);">
           Project &amp; Program Operations
         </p>
 
@@ -74,17 +92,17 @@
           <div>
             <p class="font-heading font-bold text-4xl text-primary leading-none"
                data-counter="4" data-suffix="+">4+</p>
-            <p class="text-text-muted text-xs mt-2 font-medium uppercase tracking-[0.12em]" style="font-family: var(--font-body);">Years Exp.</p>
+            <p class="text-text-muted text-xs mt-2 font-medium uppercase tracking-[0.12em]" style="font-family: var(--font-mono);">Years Exp.</p>
           </div>
           <div>
             <p class="font-heading font-bold text-4xl text-primary leading-none"
-               data-counter="4.0" data-decimal="true">4.0</p>
-            <p class="text-text-muted text-xs mt-2 font-medium uppercase tracking-[0.12em]" style="font-family: var(--font-body);">GPA at Penn</p>
+               data-counter="3.87" data-decimals="2">3.87</p>
+            <p class="text-text-muted text-xs mt-2 font-medium uppercase tracking-[0.12em]" style="font-family: var(--font-mono);">GPA at Penn</p>
           </div>
           <div>
             <p class="font-heading font-bold text-4xl text-primary leading-none">0</p>
-            <p class="text-text-muted text-xs mt-2 font-medium uppercase tracking-[0.12em]" style="font-family: var(--font-body);">Breaches</p>
-            <p class="text-text-muted text-[10px] mt-0.5 tracking-[0.08em] uppercase" style="font-family: var(--font-body);">HIPAA / Compliance</p>
+            <p class="text-text-muted text-xs mt-2 font-medium uppercase tracking-[0.12em]" style="font-family: var(--font-mono);">Breaches</p>
+            <p class="text-text-muted text-[10px] mt-0.5 tracking-[0.08em] uppercase" style="font-family: var(--font-mono);">HIPAA / Compliance</p>
           </div>
         </div>
 
@@ -93,7 +111,7 @@
           function animateCounter(el: HTMLElement) {
             const target = parseFloat(el.dataset.counter!);
             const suffix = el.dataset.suffix ?? '';
-            const isDecimal = el.dataset.decimal === 'true';
+            const decimals = parseInt(el.dataset.decimals ?? '0', 10);
             const duration = 1200;
             const start = performance.now();
 
@@ -102,8 +120,8 @@
               // ease-out-quart: faster initial rush, dramatic deceleration into final value
               const eased = 1 - Math.pow(1 - progress, 4);
               const current = target * eased;
-              el.textContent = isDecimal
-                ? current.toFixed(1) + suffix
+              el.textContent = decimals > 0
+                ? current.toFixed(decimals) + suffix
                 : Math.round(current) + suffix;
               if (progress < 1) requestAnimationFrame(tick);
             }
@@ -134,7 +152,7 @@
         <div class="relative w-44 sm:w-56 md:w-[268px] lg:w-[296px] h-[240px] sm:h-[320px] md:h-[390px] lg:h-[432px]">
           <!-- Offset decorative border -->
           <div
-            class="absolute inset-0 translate-x-3 translate-y-3 rounded-2xl border border-accent/30 pointer-events-none"
+            class="absolute inset-0 translate-x-3 translate-y-3 -rotate-2 rounded-2xl border border-dashed border-accent-gold/40 pointer-events-none"
             aria-hidden="true"
           ></div>
           <!-- Profile photo — overflow-hidden clips the hover zoom to border-radius -->
@@ -157,7 +175,7 @@
 
   <!-- Scroll indicator — desktop only; hides on mobile to prevent overlap with stats -->
   <div class="scroll-indicator hidden md:flex absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-3 text-text-muted" aria-hidden="true">
-    <span class="text-xs font-medium tracking-[0.15em] uppercase" style="font-family: var(--font-body);">Scroll</span>
+    <span class="text-xs font-medium tracking-[0.15em] uppercase" style="font-family: var(--font-mono);">Scroll</span>
     <div class="w-px h-10 bg-gradient-to-b from-text-muted/50 to-transparent"></div>
   </div>
 

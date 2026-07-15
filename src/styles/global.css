@@ -20,9 +20,13 @@
   --color-border: #DDD9D0;
   --color-border-hover: #C5C0B7;
 
-  /* ── Typography ── */
-  --font-heading: 'Playfair Display', Georgia, serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  /* ── Typography — art-school pairing ──
+     Fraunces: expressive "wonky" display serif (opsz + SOFT/WONK axes)
+     Archivo:  warm workhorse grotesque for running text
+     Space Mono: typewriter captions for labels, folios, tickers */
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Archivo', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
 
   /* ── Animation tokens ── */
   --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
@@ -39,16 +43,28 @@
 html { scroll-behavior: smooth; }
 body { overflow-x: hidden; overscroll-behavior: none; }
 
-/* ── Branded text selection ── */
+/* ── Branded text selection — gold, echoing the ink underline ── */
 ::selection {
-  background-color: rgba(28, 53, 87, 0.13);
+  background-color: rgba(196, 149, 58, 0.28);
   color: var(--color-text);
 }
 
-/* ── Heading typography polish ── */
+/* ── Heading typography polish ──
+   Fraunces variable axes: optical sizing on, softened terminals,
+   WONK on — the tilted, hand-set letterforms that give display
+   text its art-school personality. */
 h1, h2, h3, h4, h5, h6 {
   text-rendering: optimizeLegibility;
   font-feature-settings: "liga" 1, "kern" 1;
+}
+.font-heading {
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 40, "WONK" 1;
+}
+/* Italic accent words go full-wonk with extra softness — they should
+   feel almost hand-lettered against the geometric background. */
+.font-heading em, .font-heading .italic, .gilded-text {
+  font-variation-settings: "SOFT" 75, "WONK" 1;
 }
 
 /* ── Tap delay removal ── */
@@ -127,6 +143,121 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
   .reveal-delay-2 { transition-delay: 100ms; }
   .reveal-delay-3 { transition-delay: 150ms; }
   .reveal-delay-4 { transition-delay: 200ms; }
+}
+
+/* ─────────────────────────────────────────────
+   PAPER GRAIN — full-page film grain overlay.
+   Fractal noise at 3.5% opacity gives the cream
+   background a tactile, printed-stock feel.
+───────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─────────────────────────────────────────────
+   GHOST SECTION NUMERALS
+   Enormous outlined Playfair digits sit behind
+   each section heading — classic magazine
+   folio-page device. Stroke-only so they read
+   as texture, not content.
+───────────────────────────────────────────── */
+.section-header { position: relative; }
+.section-ghost-num {
+  position: absolute;
+  top: -0.28em;
+  left: -0.06em;
+  z-index: -1;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(7rem, 16vw, 13rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(28, 53, 87, 0.10);
+  font-variation-settings: "SOFT" 60, "WONK" 1;
+  transform: rotate(-4deg);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   HAND-DRAWN GOLD UNDERLINE
+   An SVG brush stroke draws itself in under the
+   hero name once the reveal finishes.
+───────────────────────────────────────────── */
+.ink-underline path {
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+}
+.reveal.visible .ink-underline path {
+  animation: ink-draw 900ms var(--ease-out-quint) 650ms forwards;
+}
+@keyframes ink-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   EDITORIAL TICKER
+   Slow uppercase marquee strip — the kind of
+   running-head band you'd find across a spread.
+   Track is duplicated in markup for a seamless
+   -50% loop.
+───────────────────────────────────────────── */
+.ticker {
+  overflow: hidden;
+  user-select: none;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 36s linear infinite;
+  will-change: transform;
+}
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (hover: hover) {
+  .ticker:hover .ticker-track { animation-play-state: paused; }
+}
+
+/* ─────────────────────────────────────────────
+   DROP CAP — About opening paragraph.
+   Oversized Playfair initial in accent navy.
+───────────────────────────────────────────── */
+.drop-cap::first-letter {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.82;
+  float: left;
+  padding-right: 0.12em;
+  padding-top: 0.06em;
+  color: var(--color-accent);
+}
+
+/* ─────────────────────────────────────────────
+   GILDED TEXT — award title shimmer.
+   Gold gradient sweeps slowly across the serif;
+   reads as foil-stamped lettering.
+───────────────────────────────────────────── */
+.gilded-text {
+  background: linear-gradient(105deg,
+    #8A6524 0%, #C4953A 30%, #EED9A4 50%, #C4953A 70%, #8A6524 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gild-sweep 7s ease-in-out infinite;
+}
+@keyframes gild-sweep {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 
 /* ── Gradient text — navy-to-steel shimmer ── */
@@ -369,6 +500,9 @@ a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
   .reveal { opacity: 1; transform: none; filter: none; }
   .gradient-text { animation: none; }
   .hero-float-outer, .hero-float-inner, .scroll-indicator { animation: none; }
+  .ticker-track { animation: none; }
+  .gilded-text { animation: none; }
+  .ink-underline path { stroke-dashoffset: 0; animation: none; }
   #particle-canvas { display: none; }
   .btn-primary::after, .btn-secondary::after { display: none; }
   .profile-img-wrap img { transition: none; }

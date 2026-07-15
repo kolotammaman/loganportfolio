@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1200" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <title>OG Image — Logan Moseley</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,7 +16,7 @@
       overflow: hidden;
       background: #0D0D0C;
       color: #F0EDE6;
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Space Mono', monospace;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -48,6 +48,14 @@
       pointer-events: none;
     }
 
+    /* Dashed inner accent — echoes the site's hand-drafted frames */
+    .frame-dashed {
+      position: absolute;
+      inset: 26px;
+      border: 1px dashed rgba(196, 149, 58, 0.18);
+      pointer-events: none;
+    }
+
     /* ── Top row ── */
     .top {
       display: flex;
@@ -56,57 +64,56 @@
       position: relative;
     }
 
-    /* LM monogram — mirrors the Penn icon box in Education */
+    /* LM. monogram — serif, gold full-stop, like the site nav */
     .monogram {
-      width: 42px;
-      height: 42px;
-      background: #1C3557;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      color: #ffffff;
-      letter-spacing: 0.14em;
-      flex-shrink: 0;
+      font-family: 'Fraunces', Georgia, serif;
+      font-variation-settings: "SOFT" 40, "WONK" 1;
+      font-size: 30px;
+      font-weight: 700;
+      color: #F0EDE6;
+      letter-spacing: -0.01em;
     }
+    .monogram .dot { color: #C4953A; }
 
     /* Top-right: status indicator */
     .status {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
+      gap: 10px;
+      padding: 8px 16px;
       border: 1px solid rgba(240, 237, 230, 0.12);
       background: rgba(240, 237, 230, 0.04);
     }
 
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #1C3557;
-      flex-shrink: 0;
-    }
-
     .status-text {
       font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
+      font-weight: 400;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #6A6560;
+      color: #8A857E;
     }
 
+    .star { flex-shrink: 0; }
+
     /* ── Name — the dominant moment ── */
+    .name-wrap { position: relative; }
+
     .name {
-      font-family: 'Playfair Display', Georgia, serif;
+      font-family: 'Fraunces', Georgia, serif;
+      font-variation-settings: "SOFT" 40, "WONK" 1;
+      font-optical-sizing: auto;
       font-size: 118px;
       font-weight: 700;
-      line-height: 0.88;
+      line-height: 0.92;
       color: #F0EDE6;
-      letter-spacing: -0.025em;
-      position: relative;
+      letter-spacing: -0.02em;
+    }
+
+    /* Hand-drawn gold underline under the surname */
+    .ink {
+      display: block;
+      width: 470px;
+      margin-top: 6px;
     }
 
     /* ── Bottom block ── */
@@ -117,65 +124,66 @@
       position: relative;
     }
 
-    .accent-rule {
-      width: 52px;
-      height: 3px;
-      background: #1C3557;
-    }
-
     .role {
-      font-size: 11px;
-      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      font-weight: 400;
       letter-spacing: 0.24em;
       text-transform: uppercase;
-      color: #8A857E;
-      font-family: 'Inter', sans-serif;
+      color: #A09B94;
     }
 
     .credentials {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 400;
-      color: #4A4540;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 0.01em;
+      color: #5C5751;
+      letter-spacing: 0.02em;
     }
 
-    .credentials span {
-      color: #5C5751;
-    }
+    .credentials span { color: #C4953A; }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="texture"></div>
     <div class="frame"></div>
+    <div class="frame-dashed"></div>
 
     <!-- Top row: monogram + status pill -->
     <div class="top">
-      <div class="monogram">LM</div>
+      <div class="monogram">LM<span class="dot">.</span></div>
       <div class="status">
-        <div class="status-dot"></div>
+        <svg class="star" width="9" height="9" viewBox="0 0 24 24" fill="#C4953A"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg>
         <span class="status-text">Open to Opportunities</span>
       </div>
     </div>
 
     <!-- Name — the eye-stopper -->
-    <div class="name">
-      Logan<br>Moseley.
+    <div class="name-wrap">
+      <div class="name">
+        Logan<br>Moseley.
+      </div>
+      <svg class="ink" viewBox="0 0 300 18" preserveAspectRatio="none" fill="none">
+        <path d="M4 12 C 60 4, 150 16, 296 7" stroke="#C4953A" stroke-width="5" stroke-linecap="round"/>
+      </svg>
     </div>
 
-    <!-- Bottom: rule, role, credentials -->
+    <!-- Bottom: role, credentials with gold star separators -->
     <div class="bottom">
-      <div class="accent-rule"></div>
-      <div class="role">Project &amp; Program Operations</div>
+      <div class="role">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="#C4953A"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg>
+        Project &amp; Program Operations
+      </div>
       <div class="credentials">
         University of Pennsylvania
-        <span>&nbsp;&middot;&nbsp;</span>
+        <span>&nbsp;&#10022;&nbsp;</span>
         Penn Dental Medicine
-        <span>&nbsp;&middot;&nbsp;</span>
+        <span>&nbsp;&#10022;&nbsp;</span>
         CITI Certified
-        <span>&nbsp;&middot;&nbsp;</span>
-        4.0 GPA
+        <span>&nbsp;&#10022;&nbsp;</span>
+        3.87 GPA
       </div>
     </div>
   </div>

@@ -49,8 +49,9 @@ const jobs = [
   <div class="max-w-6xl mx-auto px-6">
 
     <!-- Section label -->
-    <div class="reveal mb-14">
-      <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-body);">
+    <div class="reveal mb-14 section-header">
+      <span class="section-ghost-num" aria-hidden="true">03</span>
+      <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-mono);">
         03 / Experience
       </p>
       <h2 id="experience-heading" class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-primary leading-tight mb-4">
@@ -69,7 +70,7 @@ const jobs = [
           <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
               {job.current && (
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold tracking-wide uppercase mb-3 border border-emerald-200" style="font-family: var(--font-body);">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold tracking-wide uppercase mb-3 border border-emerald-200" style="font-family: var(--font-mono);">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
                   Current
                 </span>
@@ -88,7 +89,9 @@ const jobs = [
             <ul class="grid sm:grid-cols-2 gap-x-10 gap-y-3" role="list">
               {job.bullets.map((bullet) => (
                 <li class="flex items-start gap-3 text-text-secondary">
-                  <span class="w-1 h-1 rounded-full bg-accent/60 shrink-0 mt-2.5" aria-hidden="true" />
+                  <svg class="w-2 h-2 text-accent-gold/80 shrink-0 mt-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+                  </svg>
                   <span class="text-sm leading-relaxed" set:html={bullet}></span>
                 </li>
               ))}
