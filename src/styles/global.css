@@ -1,509 +1,329 @@
-@import "tailwindcss";
-
-@theme {
-  /* ── Color System — Editorial / Masculine ── */
-  --color-primary: #111110;
-  --color-primary-light: #3D3B37;
-  --color-accent: #1C3557;
-  --color-accent-light: #2D5585;
-  --color-accent-soft: #EBF0F7;
-  --color-accent-glow: rgba(28, 53, 87, 0.12);
-  --color-accent-gold: #C4953A;
-  --color-accent-gold-light: #D4A84B;
-  --color-accent-gold-soft: rgba(196, 149, 58, 0.10);
-  --color-bg: #EDE9E0;
-  --color-bg-dark: #0D0D0C;
-  --color-bg-card: #FFFFFF;
-  --color-text: #111110;
-  --color-text-secondary: #5C5751;
-  --color-text-muted: #A09B94;
-  --color-border: #DDD9D0;
-  --color-border-hover: #C5C0B7;
-
-  /* ── Typography — art-school pairing ──
-     Fraunces: expressive "wonky" display serif (opsz + SOFT/WONK axes)
-     Archivo:  warm workhorse grotesque for running text
-     Space Mono: typewriter captions for labels, folios, tickers */
-  --font-heading: 'Fraunces', Georgia, serif;
-  --font-body: 'Archivo', system-ui, sans-serif;
-  --font-mono: 'Space Mono', 'Courier New', monospace;
-
-  /* ── Animation tokens ── */
-  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-expo:   cubic-bezier(0.7, 0, 0.84, 0);
-  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);   /* Very long tail — silky large moves */
-  --ease-standard:  cubic-bezier(0.2, 0, 0, 1);        /* Material 3 standard */
-  --duration-enter:     920ms;
-  --duration-hover:     280ms;
-  --duration-hover-out: 140ms;
-}
-
-/* ── Base ── */
-html { scroll-behavior: smooth; }
-body { overflow-x: hidden; overscroll-behavior: none; }
-
-/* ── Branded text selection — gold, echoing the ink underline ── */
-::selection {
-  background-color: rgba(196, 149, 58, 0.28);
-  color: var(--color-text);
-}
-
-/* ── Heading typography polish ──
-   Fraunces variable axes: optical sizing on, softened terminals,
-   WONK on — the tilted, hand-set letterforms that give display
-   text its art-school personality. */
-h1, h2, h3, h4, h5, h6 {
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "liga" 1, "kern" 1;
-}
-.font-heading {
-  font-optical-sizing: auto;
-  font-variation-settings: "SOFT" 40, "WONK" 1;
-}
-/* Italic accent words go full-wonk with extra softness — they should
-   feel almost hand-lettered against the geometric background. */
-.font-heading em, .font-heading .italic, .gilded-text {
-  font-variation-settings: "SOFT" 75, "WONK" 1;
-}
-
-/* ── Tap delay removal ── */
-a, button { touch-action: manipulation; }
-
-/* ── Scroll offset — compensate for fixed nav height ── */
-section[id] { scroll-margin-top: 5rem; }
-
-/* ── Nav — smooth state transition (overrides Tailwind transition-all) ── */
-#site-nav {
-  transition: background 380ms var(--ease-out-quint),
-              border-color 380ms var(--ease-out-quint),
-              box-shadow 380ms var(--ease-out-quint),
-              backdrop-filter 380ms var(--ease-out-quint),
-              -webkit-backdrop-filter 380ms var(--ease-out-quint);
-}
-
-/* ── Nav scroll-spy active link ── */
-a.nav-link-active { color: var(--color-primary); font-weight: 500; }
-a.nav-link-active > span[aria-hidden] { width: 1.25rem; }
-
-*:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 3px;
-}
-
 /* ─────────────────────────────────────────────
-   SCROLL-TRIGGERED ENTRANCE
-   Initial state: slightly below, very slightly
-   smaller, lightly blurred — "breathes" in.
-   Uses ease-out-quint for a silky long tail.
+   Editorial Index
+   Ink on paper, one spot color, hairline rules.
+   Type: Sporting Grotesque (Velvetyne, OFL) for display and labels,
+         Sorts Mill Goudy (The League of Moveable Type, OFL) for reading.
+   Both are self-hosted from /fonts.
 ───────────────────────────────────────────── */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px) scale(0.988) translateZ(0);
-  filter: blur(1.5px);
-  transition: opacity 880ms var(--ease-out-quint),
-              transform 880ms var(--ease-out-quint),
-              filter 600ms var(--ease-out-quint);
-  will-change: opacity, transform, filter;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1) translateZ(0);
-  filter: blur(0);
-}
 
-/* Tighter stagger — feels cohesive, not mechanical */
-.reveal-delay-1 { transition-delay: 60ms; }
-.reveal-delay-2 { transition-delay: 120ms; }
-.reveal-delay-3 { transition-delay: 180ms; }
-.reveal-delay-4 { transition-delay: 240ms; }
-
-/* ── Mobile: opacity fade only.
-   Any transform (even translateY) requires the browser to composite a new
-   layer per element. With 4-6 cards revealing simultaneously during scroll,
-   that's 4-6 simultaneous layer promotions mid-scroll-frame = dropped frames.
-   Pure opacity is handled entirely by the compositor thread with no main-thread
-   involvement after the initial paint. ease-in-out means a slow start, so any
-   first-frame latency is invisible. ── */
-@media (max-width: 767px) {
-  .reveal {
-    opacity: 0;
-    transform: none;
-    filter: none;
-    will-change: opacity;
-    transition: opacity 500ms ease-in-out;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
-  .reveal-delay-1 { transition-delay: 50ms; }
-  .reveal-delay-2 { transition-delay: 100ms; }
-  .reveal-delay-3 { transition-delay: 150ms; }
-  .reveal-delay-4 { transition-delay: 200ms; }
+@font-face {
+  font-family: 'Sporting Grotesque';
+  src: url('/fonts/SportingGrotesque-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
-
-/* ─────────────────────────────────────────────
-   PAPER GRAIN — full-page film grain overlay.
-   Fractal noise at 3.5% opacity gives the cream
-   background a tactile, printed-stock feel.
-───────────────────────────────────────────── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ─────────────────────────────────────────────
-   GHOST SECTION NUMERALS
-   Enormous outlined Playfair digits sit behind
-   each section heading — classic magazine
-   folio-page device. Stroke-only so they read
-   as texture, not content.
-───────────────────────────────────────────── */
-.section-header { position: relative; }
-.section-ghost-num {
-  position: absolute;
-  top: -0.28em;
-  left: -0.06em;
-  z-index: -1;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: clamp(7rem, 16vw, 13rem);
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(28, 53, 87, 0.10);
-  font-variation-settings: "SOFT" 60, "WONK" 1;
-  transform: rotate(-4deg);
-  user-select: none;
-  pointer-events: none;
-}
-
-/* ─────────────────────────────────────────────
-   HAND-DRAWN GOLD UNDERLINE
-   An SVG brush stroke draws itself in under the
-   hero name once the reveal finishes.
-───────────────────────────────────────────── */
-.ink-underline path {
-  stroke-dasharray: 320;
-  stroke-dashoffset: 320;
-}
-.reveal.visible .ink-underline path {
-  animation: ink-draw 900ms var(--ease-out-quint) 650ms forwards;
-}
-@keyframes ink-draw {
-  to { stroke-dashoffset: 0; }
-}
-
-/* ─────────────────────────────────────────────
-   EDITORIAL TICKER
-   Slow uppercase marquee strip — the kind of
-   running-head band you'd find across a spread.
-   Track is duplicated in markup for a seamless
-   -50% loop.
-───────────────────────────────────────────── */
-.ticker {
-  overflow: hidden;
-  user-select: none;
-}
-.ticker-track {
-  display: flex;
-  width: max-content;
-  animation: ticker-scroll 36s linear infinite;
-  will-change: transform;
-}
-@keyframes ticker-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-@media (hover: hover) {
-  .ticker:hover .ticker-track { animation-play-state: paused; }
-}
-
-/* ─────────────────────────────────────────────
-   DROP CAP — About opening paragraph.
-   Oversized Playfair initial in accent navy.
-───────────────────────────────────────────── */
-.drop-cap::first-letter {
-  font-family: var(--font-heading);
+@font-face {
+  font-family: 'Sporting Grotesque';
+  src: url('/fonts/SportingGrotesque-Bold.woff2') format('woff2');
   font-weight: 700;
-  font-size: 3.4em;
-  line-height: 0.82;
-  float: left;
-  padding-right: 0.12em;
-  padding-top: 0.06em;
-  color: var(--color-accent);
+  font-style: normal;
+  font-display: swap;
 }
-
-/* ─────────────────────────────────────────────
-   GILDED TEXT — award title shimmer.
-   Gold gradient sweeps slowly across the serif;
-   reads as foil-stamped lettering.
-───────────────────────────────────────────── */
-.gilded-text {
-  background: linear-gradient(105deg,
-    #8A6524 0%, #C4953A 30%, #EED9A4 50%, #C4953A 70%, #8A6524 100%);
-  background-size: 250% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gild-sweep 7s ease-in-out infinite;
+@font-face {
+  font-family: 'Sorts Mill Goudy';
+  src: url('/fonts/SortsMillGoudy-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
-@keyframes gild-sweep {
-  0%, 100% { background-position: 0% 50%; }
-  50%      { background-position: 100% 50%; }
-}
-
-/* ── Gradient text — navy-to-steel shimmer ── */
-.gradient-text {
-  background: linear-gradient(135deg, #1C3557 0%, #2D6FA6 50%, #1C3557 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 9s ease-in-out infinite;
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
-}
-
-/* ── Card — clean editorial ── */
-.glass {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-}
-
-/* ─────────────────────────────────────────────
-   CARD HOVER
-   Enter: quint — smooth, long tail, restrained.
-   Exit: in-expo — snaps away cleanly.
-   Lift reduced to 4px — more elegant restraint.
-───────────────────────────────────────────── */
-.card-hover {
-  transition: transform var(--duration-hover-out) var(--ease-in-expo),
-              box-shadow var(--duration-hover-out) var(--ease-in-expo),
-              border-color var(--duration-hover-out) ease;
-}
-@media (hover: hover) {
-  .card-hover:hover {
-    transform: translateY(-4px) translateZ(0);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.09), 0 0 0 1px rgba(28, 53, 87, 0.07);
-    border-color: var(--color-border-hover);
-    transition: transform 320ms var(--ease-out-quint),
-                box-shadow 320ms var(--ease-out-quint),
-                border-color 200ms ease;
-  }
-}
-@media (hover: none) {
-  .card-hover {
-    transition: transform 160ms ease-out, box-shadow 160ms ease-out, border-color 160ms ease;
-  }
-  .card-hover:active {
-    transform: scale(0.98) translateZ(0);
-    transition: transform 80ms ease-out;
-  }
-}
-
-/* ── Nav scrolled state ── */
-.nav-scrolled {
-  background: rgba(237, 233, 224, 0.95);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
-}
-
-/* ── Heading italic accent ── */
-.font-heading em {
+@font-face {
+  font-family: 'Sorts Mill Goudy';
+  src: url('/fonts/SortsMillGoudy-Italic.woff2') format('woff2');
+  font-weight: 400;
   font-style: italic;
-  color: var(--color-accent);
+  font-display: swap;
 }
 
-/* ─────────────────────────────────────────────
-   CTA PRIMARY BUTTON — SWEEP FILL
-   Accent-blue wipes in from left on hover.
-   The ::after pseudo-element slides behind the
-   text, creating a premium reveal transition.
-───────────────────────────────────────────── */
-.btn-primary {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--color-accent);
-  transform: translateX(-101%);
-  transition: transform 500ms var(--ease-out-quint);
-  z-index: -1;
-}
-@media (hover: hover) {
-  .btn-primary:hover::after { transform: translateX(0); }
-}
-.btn-primary:active { transform: scale(0.97) translateZ(0); }
+:root {
+  --paper: #f1eee6;
+  --paper-deep: #e8e4d9;
+  --ink: #131312;
+  --ink-soft: #55524b;
+  --rule: #131312;
+  --spot: #e0381b;
 
-/* ─────────────────────────────────────────────
-   CTA SECONDARY BUTTON — SWEEP FILL
-   Near-black fills in from left; text goes white.
-───────────────────────────────────────────── */
-.btn-secondary {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  transition: color 360ms var(--ease-out-quint), border-color 200ms ease;
-}
-.btn-secondary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--color-primary);
-  transform: translateX(-101%);
-  transition: transform 500ms var(--ease-out-quint);
-  z-index: -1;
-}
-@media (hover: hover) {
-  .btn-secondary:hover::after { transform: translateX(0); }
-  .btn-secondary:hover { color: white; border-color: var(--color-primary); }
-}
-.btn-secondary:active { transform: scale(0.97) translateZ(0); }
+  --display: 'Sporting Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --text: 'Sorts Mill Goudy', Georgia, 'Times New Roman', serif;
 
-/* ─────────────────────────────────────────────
-   PROFILE PHOTO — SUBTLE ZOOM ON HOVER
-   overflow: hidden clips scaled image to
-   the rounded-2xl border-radius on the wrapper.
-───────────────────────────────────────────── */
-.profile-img-wrap {
-  overflow: hidden;
-}
-.profile-img-wrap img {
-  transition: transform 800ms var(--ease-out-quint);
-}
-@media (hover: hover) {
-  .profile-img-wrap:hover img {
-    transform: scale(1.04) translateZ(0);
-  }
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --rail: clamp(9rem, 17vw, 15rem);
+  --max: 82rem;
 }
 
-/* ─────────────────────────────────────────────
-   ABOUT HIGHLIGHT CARDS
-   Slide right 8px on hover — more restrained
-   than the previous 10px.
-───────────────────────────────────────────── */
-.highlight-card {
-  transition: transform var(--duration-hover-out) var(--ease-in-expo),
-              border-color var(--duration-hover-out) ease;
-}
-@media (hover: hover) {
-  .highlight-card:hover {
-    transform: translateX(8px) translateZ(0);
-    border-color: var(--color-accent-gold);
-    transition: transform 300ms var(--ease-out-quint),
-                border-color 200ms ease;
-  }
-}
-@media (hover: none) {
-  .highlight-card:active {
-    transform: translateX(4px) translateZ(0);
-    border-color: var(--color-accent-gold-light);
-    transition: transform 80ms ease-out, border-color 80ms ease-out;
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--text);
+  font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.3125rem);
+  line-height: 1.5;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'onum' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* ── Stat counter — tabular numbers for stable width ── */
-[data-counter] {
-  will-change: contents;
-  font-variant-numeric: tabular-nums;
+img { display: block; max-width: 100%; }
+ul { list-style: none; }
+a { color: inherit; text-decoration: none; }
+strong { font-weight: 400; background: linear-gradient(transparent 62%, color-mix(in srgb, var(--spot) 22%, transparent) 62%); }
+
+::selection { background: var(--spot); color: var(--paper); }
+
+:focus-visible { outline: 2px solid var(--spot); outline-offset: 3px; }
+
+.skip {
+  position: absolute; left: var(--gutter); top: -4rem; z-index: 100;
+  background: var(--ink); color: var(--paper); padding: .6rem 1rem;
+  font-family: var(--display); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
+}
+.skip:focus { top: 1rem; }
+
+/* ── Labels: small caps grotesque ── */
+.label {
+  font-family: var(--display);
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+.muted { color: var(--ink-soft); }
+
+/* ── Shell ── */
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ── Masthead ── */
+.mast {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+.mast .wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 3.25rem; gap: 1.5rem;
+}
+.mast .mark { white-space: nowrap; font-family: var(--display); font-weight: 700; letter-spacing: -.01em; font-size: 1.05rem; }
+.mast nav ul { display: flex; gap: clamp(.9rem, 2.2vw, 1.9rem); }
+.mast nav a { white-space: nowrap;
+  position: relative; padding: .35rem 0;
+  font-family: var(--display); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+}
+.mast nav a::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--spot); transform: scaleX(0); transform-origin: left;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+.mast nav a:hover::after, .mast nav a[aria-current='true']::after { transform: scaleX(1); }
+.mast .clock { font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 1120px) { .mast .clock { display: none; } }
+
+@media (max-width: 760px) {
+  .mast .clock { display: none; }
+  .mast .wrap { height: auto; padding-top: .7rem; padding-bottom: .7rem; flex-wrap: wrap; }
+  .mast nav { width: 100%; overflow-x: auto; }
+  .mast nav ul { gap: 1.1rem; width: max-content; }
 }
 
-/* ─────────────────────────────────────────────
-   HERO DECORATIVE CIRCLES — AMBIENT FLOAT
-   Longer periods (14s / 18s) = more ambient,
-   less distracting.
-───────────────────────────────────────────── */
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-16px); }
+/* ── Hero ── */
+.hero { padding: clamp(2rem, 6vw, 4.5rem) 0 0; }
+.hero-name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(3.2rem, 13vw, 12.5rem);
+  line-height: .86;
+  letter-spacing: -.045em;
+  margin-left: -.04em;
 }
-@keyframes float-slow-reverse {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(12px); }
+.hero-name > span { display: block; }
+.hero-name .dot { color: var(--spot); }
+.hero-name .indent { padding-left: clamp(.75rem, 9vw, 8.5rem); }
+
+.hero-grid {
+  margin-top: clamp(2rem, 5vw, 4rem);
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: var(--rail) 1fr minmax(0, 20rem);
+  gap: 0 clamp(1.25rem, 3vw, 2.5rem);
 }
-.hero-float-outer {
-  animation: float-slow 14s ease-in-out infinite;
-  will-change: transform;
+.hero-grid > * { padding: 1.1rem 0 clamp(2rem, 4vw, 3rem); }
+.hero-lede { font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.15rem); line-height: 1.22; max-width: 34ch; }
+.hero-lede em { color: var(--spot); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.75rem; }
+
+.hero-photo figure { position: relative; }
+.hero-photo img {
+  width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top;
+  filter: grayscale(1) contrast(1.08);
+  border: 1px solid var(--rule);
 }
-.hero-float-inner {
-  animation: float-slow-reverse 18s ease-in-out infinite;
-  will-change: transform;
+.hero-photo figcaption { margin-top: .6rem; display: flex; justify-content: space-between; gap: 1rem; }
+
+.facts { display: grid; gap: 0; }
+.facts div { padding: .55rem 0; border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+.facts div:first-child { border-top: 0; padding-top: 0; }
+.facts dt { margin-bottom: .1rem; }
+.facts dd { font-size: 1.05rem; line-height: 1.3; }
+
+@media (max-width: 980px) {
+  .hero-grid { grid-template-columns: 1fr 1fr; }
+  .hero-grid > .facts { grid-column: 1; grid-row: 2; }
+  .hero-grid > .hero-main { grid-column: 1 / -1; grid-row: 1; }
+  .hero-grid > .hero-photo { grid-column: 2; grid-row: 2; }
+}
+@media (max-width: 560px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-grid > .hero-main, .hero-grid > .facts, .hero-grid > .hero-photo { grid-column: 1; grid-row: auto; }
+  .hero-photo { max-width: 15rem; }
+  .hero-name .indent { padding-left: 0; }
 }
 
-/* ── Scroll indicator — smooth pulse ── */
-@keyframes scroll-nudge {
-  0%   { opacity: 0.3; transform: translateY(0); }
-  50%  { opacity: 0.65; transform: translateY(7px); }
-  100% { opacity: 0.3; transform: translateY(0); }
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: .6rem;
+  padding: .8rem 1.25rem;
+  border: 1px solid var(--ink);
+  font-family: var(--display); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase;
+  transition: background-color .25s, color .25s, border-color .25s;
 }
-.scroll-indicator {
-  animation: scroll-nudge 2.8s ease-in-out infinite;
-  will-change: opacity, transform;
+.btn:hover { background: var(--spot); border-color: var(--spot); color: var(--paper); }
+.btn.solid { background: var(--ink); color: var(--paper); }
+.btn.solid:hover { background: var(--spot); }
+
+/* ── Sections ── */
+.sec { border-top: 1px solid var(--rule); }
+.sec-grid {
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  gap: 0 clamp(1.25rem, 3vw, 2.5rem);
+  padding-block: clamp(2rem, 5vw, 3.75rem) clamp(3rem, 7vw, 6rem);
+}
+.sec-head { position: relative; }
+.sec-head .label { position: sticky; top: 4.75rem; display: block; }
+.sec-head .num { color: var(--spot); margin-right: .5rem; }
+.sec-body > * + * { margin-top: 1.4rem; }
+
+.sec h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 1.2rem + 4.2vw, 4.6rem);
+  line-height: .95;
+  letter-spacing: -.035em;
+  max-width: 17ch;
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+.sec h2 em { font-family: var(--text); font-weight: 400; letter-spacing: -.01em; color: var(--spot); }
+
+@media (max-width: 760px) {
+  .sec-grid { grid-template-columns: 1fr; }
+  .sec-head { margin-bottom: 1.25rem; }
+  .sec-head .label { position: static; }
 }
 
-/* ─────────────────────────────────────────────
-   MOBILE MENU — STAGGERED ITEM FADE
-   Items fade + rise in as the menu slides open.
-───────────────────────────────────────────── */
-#mobile-menu li a {
-  opacity: 0;
-  transform: translateY(5px);
-  transition: opacity 200ms ease, transform 200ms var(--ease-out-quint);
-}
-#mobile-menu[aria-hidden="false"] li a {
-  opacity: 1;
-  transform: translateY(0);
-}
-#mobile-menu li:nth-child(1) a { transition-delay: 60ms; }
-#mobile-menu li:nth-child(2) a { transition-delay: 110ms; }
-#mobile-menu li:nth-child(3) a { transition-delay: 160ms; }
-#mobile-menu li:nth-child(4) a { transition-delay: 210ms; }
-#mobile-menu li:nth-child(5) a { transition-delay: 260ms; }
-#mobile-menu li:nth-child(6) a { transition-delay: 310ms; }
-#mobile-menu li:nth-child(7) a { transition-delay: 360ms; }
-
-/* ── Skills icon — subtle lift on parent cell hover ── */
-.skill-icon {
-  transition: transform 300ms var(--ease-out-quint), border-color 300ms ease;
-}
-@media (hover: hover) {
-  .group:hover .skill-icon {
-    transform: translateY(-3px) translateZ(0);
-  }
+.prose p { max-width: 38em; }
+.prose p + p { margin-top: 1.1em; }
+.prose .first::first-letter {
+  font-family: var(--display); font-weight: 700; color: var(--spot);
+  float: left; font-size: 4.1em; line-height: .82; padding: .06em .1em 0 0;
 }
 
-/* ── Reduced motion — kill everything ── */
+/* ── Index lists (leader rows) ── */
+.rows { border-top: 1px solid var(--rule); }
+.row {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  align-items: baseline;
+  gap: 0 1.25rem;
+  padding: 1.1rem .25rem;
+  border-bottom: 1px solid var(--rule);
+  transition: background-color .22s, color .22s, padding .3s cubic-bezier(.22, 1, .36, 1);
+}
+a.row:hover { background: var(--ink); color: var(--paper); padding-left: 1rem; padding-right: 1rem; }
+a.row:hover .row-no, a.row:hover .row-arrow { color: var(--spot); }
+.row-no { font-family: var(--display); font-size: .78rem; letter-spacing: .1em; color: var(--ink-soft); }
+.row-title { font-family: var(--display); font-weight: 700; font-size: clamp(1.35rem, 1rem + 1.6vw, 2.2rem); letter-spacing: -.025em; line-height: 1.05; }
+.row-desc { display: block; margin-top: .45rem; font-size: 1.02rem; line-height: 1.4; max-width: 46ch; opacity: .82; }
+.row-meta { text-align: right; }
+.row-arrow { font-family: var(--display); font-size: 1.4rem; line-height: 1; color: var(--spot); transition: transform .3s cubic-bezier(.22, 1, .36, 1); display: inline-block; }
+a.row:hover .row-arrow { transform: translate(.2rem, -.2rem); }
+
+@media (max-width: 640px) {
+  .row { grid-template-columns: 2.2rem 1fr; }
+  .row-meta { grid-column: 2; text-align: left; margin-top: .6rem; }
+}
+
+/* ── Experience ── */
+.job { padding: 1.5rem 0 2.25rem; border-bottom: 1px solid var(--rule); }
+.job:first-child { padding-top: 0; }
+.job-top { display: grid; grid-template-columns: 1fr auto; gap: .35rem 2rem; align-items: baseline; }
+.job h3 { font-family: var(--display); font-weight: 700; font-size: clamp(1.3rem, 1rem + 1.2vw, 1.85rem); letter-spacing: -.02em; line-height: 1.1; }
+.job .org { font-style: italic; color: var(--ink-soft); margin-top: .3rem; }
+.job-when { text-align: right; }
+.job ul { margin-top: 1.1rem; display: grid; gap: .65rem; max-width: 48em; }
+.job li { position: relative; padding-left: 1.4rem; font-size: 1.04rem; line-height: 1.45; }
+.job li::before { content: ''; position: absolute; left: 0; top: .72em; width: .6rem; height: 1px; background: var(--spot); }
+@media (max-width: 640px) { .job-top { grid-template-columns: 1fr; } .job-when { text-align: left; } }
+
+/* ── Results as a numbered spread ── */
+.results { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.result { padding: 1.4rem 1.4rem 1.7rem; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.result .label { color: var(--spot); }
+.result h3 { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: -.02em; line-height: 1.1; margin: .5rem 0 .6rem; }
+.result p { font-size: 1.02rem; line-height: 1.45; }
+@media (max-width: 760px) { .results { grid-template-columns: 1fr; } }
+
+/* ── Stat strip ── */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.stat { padding: 1.1rem 0; }
+.stat + .stat { padding-left: 1.25rem; border-left: 1px solid var(--rule); }
+.stat b { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.2rem); letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { display: block; margin-top: .4rem; }
+
+/* ── Skills ── */
+.skills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 clamp(1.25rem, 3vw, 2.5rem); }
+.skill-group { padding: 1rem 0 1.5rem; border-top: 1px solid var(--rule); }
+.skill-group h3 { font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; margin-bottom: .6rem; }
+.skill-group p { font-size: 1.04rem; line-height: 1.5; }
+.skill-group p i { color: var(--spot); font-style: normal; padding: 0 .2em; }
+@media (max-width: 760px) { .skills { grid-template-columns: 1fr; } }
+
+/* ── Education ── */
+.edu { border-top: 1px solid var(--rule); padding-top: 1.25rem; }
+.edu h3 { font-family: var(--display); font-weight: 700; font-size: clamp(1.6rem, 1rem + 2vw, 2.5rem); letter-spacing: -.03em; line-height: 1.02; }
+.edu .deg { font-style: italic; margin-top: .4rem; }
+.tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.1rem; }
+.tag { border: 1px solid var(--ink); padding: .35rem .7rem; }
+.tag.fill { background: var(--ink); color: var(--paper); }
+
+/* ── Contact ── */
+.contact-big {
+  display: block;
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(1.7rem, .6rem + 5.6vw, 5.6rem);
+  letter-spacing: -.04em; line-height: 1;
+  overflow-wrap: anywhere;
+  transition: color .25s;
+}
+.contact-big:hover { color: var(--spot); }
+
+/* ── Footer ── */
+.foot { border-top: 1px solid var(--rule); }
+.foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem 2rem; padding-top: 1.2rem; padding-bottom: 1.6rem; }
+
+/* ── Reveal: opacity only ── */
+.reveal { opacity: 0; transition: opacity .7s ease; }
+.reveal.visible { opacity: 1; }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .reveal { opacity: 1; transform: none; filter: none; }
-  .gradient-text { animation: none; }
-  .hero-float-outer, .hero-float-inner, .scroll-indicator { animation: none; }
-  .ticker-track { animation: none; }
-  .gilded-text { animation: none; }
-  .ink-underline path { stroke-dashoffset: 0; animation: none; }
-  #particle-canvas { display: none; }
-  .btn-primary::after, .btn-secondary::after { display: none; }
-  .profile-img-wrap img { transition: none; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  .reveal { opacity: 1; }
+}
+
+@media print {
+  .mast, .hero-actions, .skip { display: none; }
+  .reveal { opacity: 1; }
 }

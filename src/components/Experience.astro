@@ -1,20 +1,38 @@
 ---
+const results = [
+  {
+    label: 'SOP authorship',
+    description: 'Wrote standard operating procedures that standardized job roles and daily workflows across clinical teams and market-level operations.',
+  },
+  {
+    label: 'Workflow and checklist design',
+    description: 'Designed pre-staging systems, closing checklists, and process documentation now used daily by active clinic teams.',
+  },
+  {
+    label: 'Compliance record',
+    description: 'Perfect HIPAA compliance across all clinic operations. Zero breaches, zero missed checkpoints, crash cart materials maintained without exception.',
+  },
+  {
+    label: 'Sustainability tracking',
+    description: 'Contributed to recycling tracking and operational sustainability initiatives alongside core operational responsibilities.',
+  },
+];
+
 const jobs = [
   {
     title: 'Instrument Management & Customer Service Specialist',
     company: 'University of Pennsylvania, Penn Dental Medicine',
     location: 'Philadelphia, PA',
-    period: 'May 2023 to Present',
-    current: true,
+    period: 'May 2023 to present',
     bullets: [
       'Coordinate systems and functions across <strong>5 specialty clinics</strong>, serving <strong>200+ dental students</strong>, <strong>30+ residents</strong>, and <strong>30+ faculty</strong> daily. Zero compliance breaches across all clinical operations.',
       'Maintained a <strong>15-minute</strong> turnaround on high-priority items by building a pre-staging system around sterilization cycle timing.',
       'Sterilized, tracked, and accounted for <strong>1,000+ unique dental instruments</strong> across morning and afternoon sessions.',
-      'Cross-train new staff regularly across <strong>5 specialty clinics</strong>, each with distinct instrumentation and workflow requirements.',
-      'Serve as the first point of contact for residents and faculty under time pressure. I anticipate needs, resolve issues quickly, and keep communication accurate.',
-      'Produce and maintain clinic documentation including SOPs, signage, checklists, and training materials managed through <span class="font-medium text-text">version-controlled workflows</span>.',
-      'Coordinate <span class="font-medium text-text">cross-clinic sourcing</span> and vendor substitutions to prevent stockouts, with proactive updates to any teams affected.',
-      'Authored the <span class="font-medium text-text">closing checklist</span> now used by the full sterilization team to standardize end-of-day readiness.',
+      'Cross-train new staff regularly across 5 specialty clinics, each with distinct instrumentation and workflow requirements.',
+      'First point of contact for residents and faculty under time pressure: anticipate needs, resolve issues quickly, keep communication accurate.',
+      'Produce and maintain clinic documentation including SOPs, signage, checklists, and training materials managed through version-controlled workflows.',
+      'Coordinate cross-clinic sourcing and vendor substitutions to prevent stockouts, with proactive updates to any teams affected.',
+      'Authored the closing checklist now used by the full sterilization team to standardize end-of-day readiness.',
     ],
   },
   {
@@ -22,84 +40,71 @@ const jobs = [
     company: 'The Rounds',
     location: 'Philadelphia, PA',
     period: 'Sep 2021 to Apr 2023',
-    current: false,
     bullets: [
-      'Coordinated daily delivery routes and <span class="font-medium text-text">shift logistics</span> across the Philadelphia market using Slack and Asana.',
+      'Coordinated daily delivery routes and shift logistics across the Philadelphia market using Slack and Asana.',
       'Resolved high-volume customer issues and maintained a running log of problems and resolutions for team reference.',
-      'Wrote <span class="font-medium text-text">standard operating procedures</span> that restructured job roles and brought clarity to operations across the market.',
+      'Wrote standard operating procedures that restructured job roles and brought clarity to operations across the market.',
       'Promoted from Packing and Delivery Associate to Operations Associate within three months of starting.',
     ],
   },
   {
-    title: 'Young Adult Leadership Committee / Men\'s Group Leader',
+    title: "Young Adult Leadership Committee / Men's Group Leader",
     company: 'Saint Agatha-Saint James Catholic Church',
     location: 'Philadelphia, PA',
-    period: 'Volunteer, 2023 to Present',
-    current: false,
+    period: 'Volunteer, 2023 to present',
     bullets: [
-      'Produced a <strong>sold-out murder mystery event for 100+ paid attendees</strong>: wrote the original script from scratch, designed <strong>9 unique characters</strong>, directed actors, oversaw costume and stage design, managed lighting, secured and paid a live jazz band, and handled all venue logistics. No outside event management support.',
-      'Coordinated marketing, ticket sales, and volunteer staffing <span class="font-medium text-text">end-to-end</span>.',
-      'Leads a weekly men\'s group: curates discussion topics and manages ongoing programming.',
+      'Produced a <strong>sold-out murder mystery event for 100+ paid attendees</strong>: wrote the original script, designed 9 characters, directed actors, oversaw costume and stage design, managed lighting, booked and paid a live jazz band, and handled all venue logistics with no outside event management support.',
+      'Coordinated marketing, ticket sales, and volunteer staffing end-to-end.',
+      "Leads a weekly men's group: curates discussion topics and manages ongoing programming.",
     ],
   },
 ];
 ---
 
-<section id="experience" class="py-24 md:py-32 border-t border-border" aria-labelledby="experience-heading">
-  <div class="max-w-6xl mx-auto px-6">
-
-    <!-- Section label -->
-    <div class="reveal mb-14 section-header">
-      <span class="section-ghost-num" aria-hidden="true">03</span>
-      <p class="text-text-muted text-xs font-medium tracking-[0.2em] uppercase mb-4" style="font-family: var(--font-mono);">
-        03 / Experience
-      </p>
-      <h2 id="experience-heading" class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-primary leading-tight mb-4">
-        Where I've<br><em>made impact.</em>
-      </h2>
-      <p class="text-text-secondary text-lg max-w-xl">
-        Two very different environments. The same standard.
-      </p>
-    </div>
-
-    <div class="space-y-6">
-      {jobs.map((job, jobIndex) => (
-        <article class={`reveal reveal-delay-${jobIndex + 1} glass rounded-xl p-7 sm:p-9 card-hover ${job.current ? 'border-l-2 border-l-accent-gold' : ''}`}>
-
-          <!-- Header row -->
-          <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
-              {job.current && (
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold tracking-wide uppercase mb-3 border border-emerald-200" style="font-family: var(--font-mono);">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
-                  Current
-                </span>
-              )}
-              <h3 class="font-heading font-semibold text-xl text-primary">{job.title}</h3>
-              <p class="text-accent font-medium mt-1 text-sm tracking-wide" style="font-family: var(--font-body);">{job.company}</p>
-            </div>
-            <div class="text-right shrink-0">
-              <span class="text-text-secondary text-sm font-medium" style="font-family: var(--font-body);">{job.period}</span>
-              <p class="text-text-muted text-xs mt-1" style="font-family: var(--font-body);">{job.location}</p>
-            </div>
+<section id="results" class="sec" aria-labelledby="results-h">
+  <div class="wrap sec-grid">
+    <div class="sec-head"><span class="label"><span class="num">02</span>Key results</span></div>
+    <div class="sec-body reveal">
+      <h2 id="results-h">What I&rsquo;ve <em>built and delivered.</em></h2>
+      <div class="results">
+        {results.map((r, i) => (
+          <div class="result">
+            <span class="label">No. {String(i + 1).padStart(2, '0')}</span>
+            <h3>{r.label}</h3>
+            <p>{r.description}</p>
           </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
 
-          <!-- Bullets -->
-          <div class="border-t border-border/60 pt-5">
-            <ul class="grid sm:grid-cols-2 gap-x-10 gap-y-3" role="list">
-              {job.bullets.map((bullet) => (
-                <li class="flex items-start gap-3 text-text-secondary">
-                  <svg class="w-2 h-2 text-accent-gold/80 shrink-0 mt-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
-                  </svg>
-                  <span class="text-sm leading-relaxed" set:html={bullet}></span>
-                </li>
+<section id="experience" class="sec" aria-labelledby="experience-h">
+  <div class="wrap sec-grid">
+    <div class="sec-head"><span class="label"><span class="num">03</span>Experience</span></div>
+    <div class="sec-body reveal">
+      <h2 id="experience-h">Two very different environments. <em>The same standard.</em></h2>
+      <div>
+        {jobs.map((job) => (
+          <article class="job">
+            <div class="job-top">
+              <div>
+                <h3>{job.title}</h3>
+                <p class="org">{job.company}</p>
+              </div>
+              <div class="job-when">
+                <p class="label">{job.period}</p>
+                <p class="label muted">{job.location}</p>
+              </div>
+            </div>
+            <ul>
+              {job.bullets.map((b) => (
+                <li set:html={b} />
               ))}
             </ul>
-          </div>
-
-        </article>
-      ))}
+          </article>
+        ))}
+      </div>
     </div>
   </div>
 </section>

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="vendor/sql-wasm.js"></script>
+<script src="demo.js"></script>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saint Party</title>
+<style>
+  /* Fonts are served from /fonts (SIL Open Font License), so nothing loads from Google. */
+  @font-face { font-family: "Pirata One"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/pirata-one-latin.woff2) format("woff2"); }
+  @font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(fonts/bricolage-grotesque-latin.woff2) format("woff2"); }
+  /*
+   * Look: a stained-glass window. Jewel-tone panes with black leading behind
+   * everything, an arched gothic window for the invite, blackletter display
+   * type, and leaded panels with hard offset shadows.
+   */
+  :root {
+    --lead: #120d12;
+    --glass: #fbfaf7;
+    --ink: #120d12;
+    --soft: #5d5262;
+    --ruby: #c8203f;
+    --cobalt: #2346c4;
+    --emerald: #12895a;
+    --amber: #f2a51a;
+    --violet: #6b2fb8;
+    --display: "Pirata One", Georgia, serif;
+    --body: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --lw: 3px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--lead); color: var(--ink); font: 16px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+  #glassBg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+  .sweep {
+    position: fixed; inset: -20%; z-index: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.16) 48%, transparent 60%);
+    animation: sweep 14s ease-in-out infinite alternate;
+  }
+  @keyframes sweep { from { transform: translateX(-30%); } to { transform: translateX(30%); } }
+  main { position: relative; z-index: 1; width: 100%; max-width: 460px; margin: 0 auto; padding: 22px 16px 56px; display: grid; gap: 18px; }
+
+  .pane { background: var(--glass); border: var(--lw) solid var(--lead); border-radius: 6px; box-shadow: 6px 6px 0 var(--lead); padding: 18px; }
+  .pane h2 { font-family: var(--display); font-weight: 400; font-size: 32px; line-height: 1; margin: 0 0 10px; }
+  .kicker { display: inline-block; font-weight: 800; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; background: var(--lead); color: var(--glass); padding: 4px 10px; border-radius: 3px; margin-bottom: 10px; }
+
+  .window {
+    position: relative; text-align: center; color: var(--glass); background: var(--cobalt);
+    border: var(--lw) solid var(--lead); border-radius: 230px 230px 6px 6px; padding: 54px 22px 22px; overflow: hidden;
+    box-shadow: 6px 6px 0 var(--lead);
+  }
+  .window::before { content: ""; position: absolute; inset: 10px; border: 2px solid rgba(255,255,255,.35); border-radius: 220px 220px 4px 4px; pointer-events: none; }
+  .window .rose { width: 92px; height: 92px; margin: 0 auto 4px; display: block; }
+  .window .invited { font-weight: 800; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; margin: 0; opacity: .9; }
+  .window h1 { font-family: var(--display); font-weight: 400; font-size: clamp(58px, 17vw, 84px); line-height: .9; margin: 6px 0 14px; color: #fff; text-shadow: 3px 3px 0 var(--lead); }
+  .facts { display: grid; gap: 6px; margin: 0 auto 4px; max-width: 320px; }
+  .fact { background: var(--glass); color: var(--ink); border: var(--lw) solid var(--lead); border-radius: 4px; padding: 7px 10px; font-weight: 600; font-size: 15px; }
+  .fact.dim { color: var(--soft); font-weight: 400; font-style: italic; }
+  .cal { display: inline-block; margin-top: 10px; color: #fff; font-weight: 600; font-size: 14px; }
+  .host { margin: 12px 0 0; font-size: 14px; opacity: .9; }
+  .invite-text { white-space: pre-line; margin: 0; }
+  .chip-in { display: flex; gap: 14px; align-items: flex-start; }
+  .chip-in .coin { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: var(--amber); border: var(--lw) solid var(--lead); display: grid; place-items: center; font-family: var(--display); font-size: 22px; }
+  .chip-in p { margin: 0; }
+  .chip-in a { color: var(--cobalt); font-weight: 800; }
+
+  button {
+    font: 800 16px var(--body); color: var(--ink); background: var(--glass);
+    border: var(--lw) solid var(--lead); border-radius: 6px; padding: 13px 14px; cursor: pointer;
+    box-shadow: 4px 4px 0 var(--lead); transition: transform .06s, box-shadow .06s; -webkit-tap-highlight-color: transparent;
+  }
+  button:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--lead); }
+  button:disabled { opacity: .5; cursor: default; }
+  button:focus-visible, input:focus-visible, .names .more:focus-visible, a:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .go { background: var(--ruby); color: #fff; width: 100%; font-size: 18px; }
+  .plain { background: none; border: 0; box-shadow: none; padding: 6px 4px; font-weight: 600; font-size: 14px; text-decoration: underline; color: var(--soft); }
+  .plain:active:not(:disabled) { transform: none; box-shadow: none; }
+
+  /* The one form */
+  .step { margin: 0 0 18px; }
+  .step-h { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; margin: 0 0 8px; }
+  .step-h .num { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--lead); color: var(--glass); font-size: 14px; }
+  .step-h small { font-weight: 400; color: var(--soft); font-size: 13px; }
+  .row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .row2b { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pick { padding: 12px 6px; font-size: 15px; }
+  .pick[aria-pressed="true"] { background: var(--cobalt); color: #fff; }
+  .pick[aria-pressed="true"][data-s="Going"] { background: var(--emerald); }
+  .pick[aria-pressed="true"][data-s="Maybe"] { background: var(--amber); color: var(--ink); }
+  .pick[aria-pressed="true"][data-s="no"] { background: var(--ruby); }
+  input.t { width: 100%; font: 17px var(--body); color: var(--ink); background: #fff; border: var(--lw) solid var(--lead); border-radius: 4px; padding: 10px 12px; margin: 0; }
+  .levels { display: grid; gap: 8px; }
+  .level { text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 1px 12px; align-items: center; padding: 10px 12px; border-left-width: 14px; }
+  .level .t { font-size: 16px; }
+  .level .d { grid-column: 1; font-weight: 400; font-size: 13px; color: var(--soft); line-height: 1.3; }
+  .level .n { grid-column: 2; grid-row: 1 / span 2; font-size: 13px; font-weight: 800; }
+  .level[data-l="Easy"] { border-left-color: var(--emerald); }
+  .level[data-l="Medium"] { border-left-color: var(--amber); }
+  .level[data-l="Extra difficult"] { border-left-color: var(--ruby); }
+  .level[data-l="Any"] { border-left-color: var(--violet); }
+  .level[aria-pressed="true"] { background: #e9e4ff; outline: 3px solid var(--lead); outline-offset: -1px; }
+  .level[aria-pressed="true"] .d { color: var(--ink); }
+  .keep { margin: 0 0 16px; font-size: 14px; padding: 10px 12px; border: 2px dashed var(--lead); border-radius: 4px; }
+
+  .status-line { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .badge { font-weight: 800; padding: 6px 12px; border: var(--lw) solid var(--lead); border-radius: 4px; }
+  .badge.Going { background: var(--emerald); color: #fff; }
+  .badge.Maybe { background: var(--amber); }
+  .badge.no { background: var(--ruby); color: #fff; }
+  .status-line p { margin: 0; flex: 1 1 160px; min-width: 0; }
+
+  .tally { display: flex; gap: 10px; margin: 0 0 12px; }
+  .tally div { flex: 1; border: var(--lw) solid var(--lead); border-radius: 4px; padding: 6px 10px; }
+  .tally b { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1; display: block; }
+  .tally span { font-size: 13px; font-weight: 600; }
+  .tally .g { background: #dff3e9; } .tally .m { background: #fff0cf; }
+  .names { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .names li { border: 2px solid var(--lead); border-radius: 999px; padding: 3px 10px; font-size: 14px; font-weight: 600; background: #fff; }
+  .names li.maybe { border-style: dashed; color: var(--soft); }
+  .names .more { cursor: pointer; background: var(--lead); color: var(--glass); }
+
+  .card {
+    --c-bg: #fbf6ea; --c-ink: #2a2233; --c-acc: #b9862c;
+    position: relative; overflow: hidden; text-align: center; background: var(--c-bg); color: var(--c-ink);
+    border: var(--lw) solid var(--lead); border-radius: 200px 200px 6px 6px; box-shadow: 6px 6px 0 var(--lead); padding: 34px 20px 22px;
+  }
+  .card::before { content: ""; position: absolute; inset: 9px; border: 2px solid var(--c-acc); opacity: .55; border-radius: 190px 190px 4px 4px; pointer-events: none; }
+  .card .wm { position: absolute; right: -26px; bottom: -26px; width: 190px; height: 190px; color: var(--c-acc); opacity: .1; pointer-events: none; }
+  .medal { width: 64px; height: 64px; margin: 4px auto 10px; border-radius: 50%; display: grid; place-items: center; background: var(--c-acc); color: var(--c-bg); border: var(--lw) solid var(--lead); }
+  .medal svg { width: 32px; height: 32px; }
+  .card .label { font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; opacity: .7; margin: 0; }
+  .card h3 { font-family: var(--display); font-weight: 400; font-size: 44px; line-height: .95; margin: 6px 0; }
+  .card .patron { font-style: italic; font-size: 16px; margin: 0 0 10px; opacity: .85; }
+  .lvl { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 3px 10px; border: 2px solid var(--lead); border-radius: 3px; margin-bottom: 16px; background: var(--glass); }
+  .sec-h { font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--c-acc); margin: 0 0 6px; }
+  .card .costume { font-size: 16px; line-height: 1.5; margin: 0; }
+  .mission { text-align: left; border-top: 2px dashed color-mix(in srgb, var(--c-ink) 30%, transparent); margin-top: 18px; padding-top: 14px; position: relative; }
+  .mission > .sec-h { text-align: center; margin-bottom: 12px; }
+  .task { margin: 0 0 14px; }
+  .task:last-child { margin-bottom: 0; }
+  .task > b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; margin-bottom: 3px; }
+  .task p, .task li { margin: 0; font-size: 15px; line-height: 1.45; }
+  .task ul { margin: 0; padding-left: 18px; }
+  .task li + li { margin-top: 4px; }
+  .when { display: inline-block; font-size: 12px; font-weight: 800; padding: 2px 8px; border: 2px solid var(--lead); border-radius: 3px; margin: 0 0 5px; background: var(--glass); color: var(--ink); }
+  .quiet { display: block; font-size: 13px; font-style: italic; opacity: .8; margin-bottom: 3px; }
+  .spot { border: 2px solid var(--lead); border-radius: 6px; padding: 10px 12px; background: color-mix(in srgb, var(--c-acc) 16%, var(--c-bg)); }
+  .drinks { border: 2px dashed var(--lead); border-radius: 6px; padding: 12px; text-align: center; }
+  .drinks p { margin: 0 0 10px; }
+  .drinks .btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .drinks button { padding: 8px 12px; font-size: 14px; box-shadow: 3px 3px 0 var(--lead); }
+  .drinks .yes { background: var(--emerald); color: #fff; }
+  .soon { font-size: 14px; font-style: italic; opacity: .75; margin: 0; }
+  .card.flip { animation: flip .45s ease both; }
+  @keyframes flip { from { opacity: 0; transform: rotateY(70deg) scale(.96); } to { opacity: 1; transform: none; } }
+  .under { display: grid; gap: 12px; }
+  .switch p { margin: 0 0 10px; font-weight: 600; }
+  .lvlchips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+  .lvlchips button { padding: 8px 6px; font-size: 14px; box-shadow: 3px 3px 0 var(--lead); }
+  .lvlchips button[aria-pressed="true"] { background: var(--lead); color: var(--glass); }
+
+  .findme { margin-top: 14px; padding-top: 12px; border-top: 2px dashed var(--lead); text-align: center; }
+  .findme .plain { color: var(--cobalt); font-size: 15px; font-weight: 800; }
+  .findme form { display: flex; gap: 8px; margin-top: 8px; text-align: left; }
+  .findme input.t { flex: 1 1 auto; min-width: 0; }
+  .findme form button { padding: 10px 14px; box-shadow: 3px 3px 0 var(--lead); background: var(--amber); }
+  .findme p { margin: 6px 0 0; font-size: 13px; color: var(--soft); }
+  .remind form { display: flex; gap: 8px; }
+  .remind input.t { flex: 1 1 auto; min-width: 0; }
+  .remind form button { padding: 10px 14px; box-shadow: 3px 3px 0 var(--lead); background: var(--amber); }
+  .remind p { margin: 0 0 10px; font-size: 14px; color: var(--soft); }
+  .remind .set { color: var(--ink); margin: 0; }
+
+  .note { font-size: 14px; font-weight: 600; margin: 0; text-align: center; color: var(--glass); background: var(--lead); padding: 8px 10px; border-radius: 4px; }
+  .error { font-size: 14px; font-weight: 600; margin: 0; color: #fff; background: var(--ruby); border: var(--lw) solid var(--lead); padding: 10px 12px; border-radius: 4px; }
+  .loading { text-align: center; color: #fff; font-weight: 600; padding: 30px 0; text-shadow: 1px 1px 0 var(--lead); }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .sweep, .card.flip { animation: none; } }
+</style>
+</head>
+<body>
+<div style="position:relative;z-index:50;background:#111;color:#f3ecff;font:13px/1.45 system-ui,sans-serif;padding:10px 16px;text-align:center">
+Demo of the Saint Party invite. The real party logic runs right in your browser, and your RSVP and saint are saved only on this device. Nobody gets an email.
+<button type="button" onclick="saintPartyDemoReset()" style="margin-left:8px;font:inherit;color:#111;background:#e7b75a;border:0;border-radius:6px;padding:3px 10px;cursor:pointer">Start over</button>
+<a href="host.html" style="color:#e7b75a;margin-left:8px">See the host page</a></div>
+
+<canvas id="glassBg" aria-hidden="true"></canvas>
+<div class="sweep" aria-hidden="true"></div>
+<main>
+  <header class="window">
+    <svg class="rose" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="#f2a51a" stroke="#120d12" stroke-width="4"/>
+      <g stroke="#120d12" stroke-width="3" stroke-linejoin="round">
+        <path d="M50 4 A46 46 0 0 1 82.5 17.5 L50 50 Z" fill="#c8203f"/><path d="M96 50 A46 46 0 0 1 82.5 82.5 L50 50 Z" fill="#c8203f"/>
+        <path d="M50 96 A46 46 0 0 1 17.5 82.5 L50 50 Z" fill="#c8203f"/><path d="M4 50 A46 46 0 0 1 17.5 17.5 L50 50 Z" fill="#c8203f"/>
+        <path d="M82.5 17.5 A46 46 0 0 1 96 50 L50 50 Z" fill="#12895a"/><path d="M82.5 82.5 A46 46 0 0 1 50 96 L50 50 Z" fill="#12895a"/>
+        <path d="M17.5 82.5 A46 46 0 0 1 4 50 L50 50 Z" fill="#12895a"/><path d="M17.5 17.5 A46 46 0 0 1 50 4 L50 50 Z" fill="#12895a"/>
+      </g>
+      <circle cx="50" cy="50" r="15" fill="#fbfaf7" stroke="#120d12" stroke-width="4"/>
+    </svg>
+    <p class="invited">You're invited to</p>
+    <h1 id="evTitle">Saint Party</h1>
+    <div class="facts">
+      <div class="fact" id="evDate">Saturday, October 31</div>
+      <div class="fact" id="evTime">9 PM to midnight</div>
+      <div class="fact dim" id="evWhere">Address unlocks when you RSVP</div>
+    </div>
+    <a class="cal" id="evCal" href="#" target="_blank" rel="noopener" hidden>Add to Google Calendar</a>
+    <p class="host" id="evHost">Hosted by Logan</p>
+  </header>
+
+  <section class="pane">
+    <span class="kicker">The deal</span>
+    <p class="invite-text" id="evInvite"></p>
+  </section>
+
+  <!-- One form: RSVP and get your saint -->
+  <section class="pane" id="joinPane">
+    <span class="kicker" id="joinKicker">RSVP and get your saint</span>
+    <form id="joinForm" autocomplete="on" novalidate>
+      <div class="step">
+        <p class="step-h"><span class="num">1</span>Are you coming?</p>
+        <div class="row3" role="group" aria-label="Are you coming?">
+          <button type="button" class="pick" data-s="Going" aria-pressed="false">Going</button>
+          <button type="button" class="pick" data-s="Maybe" aria-pressed="false">Maybe</button>
+          <button type="button" class="pick" data-s="no" aria-pressed="false">Can't go</button>
+        </div>
+      </div>
+      <div class="step">
+        <p class="step-h"><label class="step-h" for="fName" style="margin:0"><span class="num">2</span>Your name</label></p>
+        <input class="t" id="fName" name="name" autocomplete="name" placeholder="First and last">
+      </div>
+      <p class="keep" id="keepNote" hidden></p>
+      <div class="step" id="stepGender">
+        <p class="step-h"><span class="num">3</span>Men's or women's saint?</p>
+        <div class="row2b" role="group" aria-label="Men's or women's saint">
+          <button type="button" class="pick" data-g="Male" aria-pressed="false">Men's</button>
+          <button type="button" class="pick" data-g="Female" aria-pressed="false">Women's</button>
+        </div>
+      </div>
+      <div class="step" id="stepLevel">
+        <p class="step-h"><span class="num">4</span>How bold are you feeling?</p>
+        <div class="levels" role="group" aria-label="How bold are you feeling?">
+          <button type="button" class="level" data-l="Easy" aria-pressed="false"><span class="t">Easy</span><span class="n"></span><span class="d">Low-key, one-on-one tasks. No spotlight.</span></button>
+          <button type="button" class="level" data-l="Medium" aria-pressed="false"><span class="t">Medium</span><span class="n"></span><span class="d">Pull a small group into something silly.</span></button>
+          <button type="button" class="level" data-l="Extra difficult" aria-pressed="false"><span class="t">Extra difficult</span><span class="n"></span><span class="d">Quiet the room at a set time and make an announcement.</span></button>
+          <button type="button" class="level" data-l="Any" aria-pressed="false"><span class="t">Surprise me</span><span class="n"></span><span class="d">Any level.</span></button>
+        </div>
+      </div>
+      <div class="step">
+        <p class="step-h"><label class="step-h" for="fEmail" style="margin:0"><span class="num" id="emailNum">5</span>Email <small>for party updates and your day-of reminder</small></label></p>
+        <input class="t" id="fEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+      </div>
+      <button class="go" type="submit" id="joinBtn">RSVP and reveal my saint</button>
+      <div style="text-align:center"><button class="plain" type="button" id="cancelEdit" hidden>Cancel</button></div>
+    </form>
+    <div class="findme" id="findMe" hidden>
+      <button class="plain" type="button" id="findToggle">Already RSVP'd? Find my saint</button>
+      <form id="findForm" hidden autocomplete="on">
+        <input class="t" id="findEmail" type="email" autocomplete="email" placeholder="The email you RSVP'd with" aria-label="The email you RSVP'd with">
+        <button type="submit" id="findBtn">Find</button>
+      </form>
+      <p id="findHint" hidden>Your saint is saved. This phone just forgot it was you.</p>
+    </div>
+    <div id="rsvpDone" class="status-line" hidden>
+      <span class="badge" id="rsvpBadge"></span>
+      <p id="rsvpLine"></p>
+      <button class="plain" id="rsvpChange" type="button">Change RSVP</button>
+    </div>
+  </section>
+
+  <div class="loading" id="loading">Lighting the candles…</div>
+
+  <section class="pane" id="cantGo" hidden>
+    <span class="kicker">Next time</span>
+    <p style="margin:0">Sorry you'll miss it. If plans change, tap Change RSVP above and you'll get a saint right away.</p>
+  </section>
+
+  <section id="result" class="under" hidden>
+    <div class="card" id="card">
+      <svg class="wm" id="wm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
+      <div class="medal"><svg id="medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></div>
+      <p class="label">You are</p>
+      <h3 id="saint"></h3>
+      <p class="patron" id="patron"></p>
+      <span class="lvl" id="lvl"></span>
+      <p class="sec-h">Costume</p>
+      <p class="costume" id="costume"></p>
+      <div class="mission" id="mission">
+        <p class="sec-h">Your mission tonight</p>
+        <div class="task spot" id="tAnnounce"><b>Announce to the room</b><span class="when" id="annWhen"></span><span class="quiet">Quiet the whole room first (clink a glass, flick the lights, whatever it takes). Then announce:</span><p id="announce"></p></div>
+        <div class="task drinks" id="tDrinks">
+          <b>Drinks duty</b>
+          <p id="drinksText"></p>
+          <div class="btns" id="drinksBtns">
+            <button class="yes" id="drinksYes" type="button">I'm in</button>
+            <button id="drinksNo" type="button">Not for me, give me another saint</button>
+          </div>
+        </div>
+        <div class="task" id="tFind"><b>Find these saints</b><ul id="finds"></ul><p class="soon" id="findSoon">Your saints to find will show up here on party day. Check back once the party starts.</p></div>
+        <div class="task" id="tActivity"><b>Do this</b><span class="when" id="actWhen"></span><p id="activity"></p></div>
+      </div>
+    </div>
+    <p class="note" id="note" hidden></p>
+    <section class="pane switch">
+      <p>Want a different saint?</p>
+      <button class="go" id="shuffle" type="button">Shuffle</button>
+      <div class="lvlchips" role="group" aria-label="Switch difficulty">
+        <button type="button" data-sw="Easy">Easy</button>
+        <button type="button" data-sw="Medium">Medium</button>
+        <button type="button" data-sw="Extra difficult">Extra difficult</button>
+        <button type="button" data-sw="Any">Surprise me</button>
+      </div>
+    </section>
+    <section class="pane remind" id="remind">
+      <span class="kicker">Party updates</span>
+      <p class="set" id="emailSet"><span id="emailShown"></span> <button class="plain" type="button" id="emailChange">Change</button></p>
+      <p id="remindIntro" hidden>On party day you'll get your saint, costume, tasks, and the house rules by email. Only the host sees your address.</p>
+      <form id="emailForm" autocomplete="on" hidden>
+        <input class="t" type="email" id="email" name="email" placeholder="you@example.com" aria-label="New email" required>
+        <button type="submit" id="emailSave">Save</button>
+      </form>
+    </section>
+  </section>
+
+  <p class="error" id="error" hidden></p>
+
+  <section class="pane">
+    <span class="kicker">Chip in</span>
+    <div class="chip-in">
+      <div class="coin" aria-hidden="true">$</div>
+      <p><span id="evDonation">Suggested donation of $5 to $15 to help cover party supplies. Much appreciated! Give at the door.</span></p>
+    </div>
+  </section>
+
+  <section class="pane" id="guestPane" hidden>
+    <span class="kicker">Who's coming</span>
+    <div class="tally">
+      <div class="g"><b id="nGoing">0</b><span>going</span></div>
+      <div class="m"><b id="nMaybe">0</b><span>maybe</span></div>
+    </div>
+    <ul class="names" id="names"></ul>
+  </section>
+</main>
+
+<script>
+  /* Card palettes and icons, loaded from the shared card-design file. */
+  var CARDS = { palettes: {}, icons: {} };
+
+  /* ---------- Stained-glass background ---------- */
+  (function () {
+    var cv = document.getElementById('glassBg');
+    var ctx = cv.getContext('2d');
+    var COLORS = ['#c8203f', '#2346c4', '#12895a', '#f2a51a', '#6b2fb8', '#1d6fb8', '#e2582b', '#0f6b6b'];
+    function draw() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var w = window.innerWidth, h = window.innerHeight;
+      cv.width = w * dpr; cv.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = '#120d12'; ctx.fillRect(0, 0, w, h);
+      var cell = Math.max(70, Math.min(110, w / 6));
+      var cols = Math.ceil(w / cell) + 2, rows = Math.ceil(h / cell) + 2;
+      var seed = 7;
+      function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+      var pts = [];
+      for (var y = 0; y < rows; y++) {
+        pts[y] = [];
+        for (var x = 0; x < cols; x++) pts[y][x] = [(x - 1) * cell + (rnd() - .5) * cell * .7, (y - 1) * cell + (rnd() - .5) * cell * .7];
+      }
+      ctx.lineJoin = 'round';
+      for (var yy = 0; yy < rows - 1; yy++) {
+        for (var xx = 0; xx < cols - 1; xx++) {
+          var a = pts[yy][xx], b = pts[yy][xx + 1], c = pts[yy + 1][xx + 1], d = pts[yy + 1][xx];
+          var tris = rnd() < .5 ? [[a, b, c], [a, c, d]] : [[a, b, d], [b, c, d]];
+          tris.forEach(function (t) {
+            ctx.beginPath(); ctx.moveTo(t[0][0], t[0][1]); ctx.lineTo(t[1][0], t[1][1]); ctx.lineTo(t[2][0], t[2][1]); ctx.closePath();
+            ctx.globalAlpha = .55 + rnd() * .35; ctx.fillStyle = COLORS[Math.floor(rnd() * COLORS.length)]; ctx.fill();
+            ctx.globalAlpha = 1; ctx.lineWidth = 4; ctx.strokeStyle = '#120d12'; ctx.stroke();
+          });
+        }
+      }
+    }
+    draw();
+    var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(draw, 150); });
+  })();
+
+  /* ---------- State ---------- */
+  var store = (function () {
+    var mem = {};
+    return {
+      get: function (k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] || null; } },
+      set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } },
+      del: function (k) { try { localStorage.removeItem(k); } catch (e) { delete mem[k]; } }
+    };
+  })();
+  var token = store.get('saint-token');
+  if (!token) { token = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); store.set('saint-token', token); }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var busy = false, last = {}, editing = false, showAllNames = false;
+  var sel = { s: '', g: store.get('saint-gender') || '', l: store.get('saint-level') || '' };
+  var CANT = 'Can’t go';
+  var LEVEL_COLORS = { 'Easy': '#12895a', 'Medium': '#a8650f', 'Extra difficult': '#c8203f' };
+
+  function call(action, args) {
+    return fetch('/api/' + action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(args)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) throw new Error(body.error || 'Something went wrong. Try again.');
+        return body;
+      });
+    });
+  }
+  function showError(msg) { $('error').textContent = msg; $('error').hidden = false; $('error').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  function clearError() { $('error').hidden = true; }
+
+  /* ---------- Invite + guest list ---------- */
+  function renderEvent(ev) {
+    if (!ev) return;
+    $('evTitle').textContent = ev.title;
+    $('evDate').textContent = ev.date;
+    $('evTime').textContent = ev.time;
+    $('evWhere').textContent = ev.address || 'Address unlocks when you RSVP';
+    $('evWhere').classList.toggle('dim', !ev.address);
+    $('evCal').hidden = !ev.calendarUrl;
+    if (ev.calendarUrl) $('evCal').href = ev.calendarUrl;
+    $('evHost').textContent = 'Hosted by ' + ev.host;
+    $('evInvite').textContent = ev.invite;
+    if (ev.donation) $('evDonation').textContent = ev.donation;
+  }
+
+  function renderGuests(g) {
+    if (!g) return;
+    $('nGoing').textContent = g.going.length;
+    $('nMaybe').textContent = g.maybe.length;
+    var ul = $('names'); ul.textContent = '';
+    var all = g.going.map(function (n) { return [n, '']; }).concat(g.maybe.map(function (n) { return [n, 'maybe']; }));
+    var shown = showAllNames ? all : all.slice(0, 14);
+    shown.forEach(function (x) {
+      var li = document.createElement('li'); li.textContent = x[0];
+      if (x[1]) { li.className = 'maybe'; li.title = 'Maybe'; }
+      ul.appendChild(li);
+    });
+    if (all.length > shown.length) {
+      var more = document.createElement('li'); more.className = 'more'; more.tabIndex = 0;
+      more.textContent = '+' + (all.length - shown.length) + ' more';
+      var open = function () { showAllNames = true; renderGuests(g); };
+      more.addEventListener('click', open);
+      more.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+      ul.appendChild(more);
+    }
+    $('guestPane').hidden = !all.length;
+  }
+
+  /* ---------- The one form ---------- */
+  function pressed(selector, attr, val) {
+    document.querySelectorAll(selector).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute(attr) === val)); });
+  }
+
+  function renderLevelCounts() {
+    var c = last.counts;
+    document.querySelectorAll('.level').forEach(function (b) {
+      var l = b.getAttribute('data-l');
+      var n = '';
+      if (c && c.levels && sel.g && c.levels[sel.g]) {
+        var lv = c.levels[sel.g];
+        n = l === 'Any' ? (lv.Easy + lv.Medium + lv['Extra difficult']) : (lv[l] || 0);
+        b.disabled = n === 0;
+        n = n + ' left';
+      } else { b.disabled = false; }
+      b.querySelector('.n').textContent = n;
+    });
+  }
+
+  function renderForm() {
+    var coming = sel.s && sel.s !== 'no';
+    var hasSaint = !!last.mine;
+    var needSaint = coming && !hasSaint;
+    $('stepGender').hidden = !needSaint;
+    $('stepLevel').hidden = !needSaint;
+    $('emailNum').textContent = needSaint ? '5' : '3';
+    $('keepNote').hidden = !(coming && hasSaint);
+    if (hasSaint) $('keepNote').textContent = 'You’ll keep ' + last.mine.name + '. Use Shuffle below your card if you want a different saint.';
+    if (!coming && hasSaint && sel.s === 'no') { $('keepNote').hidden = false; $('keepNote').textContent = 'Saying you can’t go gives ' + last.mine.name + ' back to the pool.'; }
+    pressed('.pick[data-s]', 'data-s', sel.s);
+    pressed('.pick[data-g]', 'data-g', sel.g);
+    pressed('.level', 'data-l', sel.l);
+    renderLevelCounts();
+    $('joinBtn').textContent = needSaint ? 'RSVP and reveal my saint' : (editing ? 'Update RSVP' : 'Send RSVP');
+    $('fEmail').placeholder = last.email ? 'Saved: ' + last.email + ' (leave blank to keep)' : 'you@example.com';
+  }
+
+  function renderRsvp() {
+    var r = last.rsvp;
+    var coming = r && r.status !== CANT;
+    var showForm = !r || editing || (coming && !last.mine);
+    $('joinForm').hidden = !showForm;
+    $('findMe').hidden = !!r;
+    $('rsvpDone').hidden = showForm;
+    $('cancelEdit').hidden = !(editing && r);
+    $('joinKicker').textContent = !r ? 'RSVP and get your saint' : (showForm ? 'Your RSVP' : 'You’re on the list');
+    if (r) {
+      var b = $('rsvpBadge');
+      b.textContent = r.status;
+      b.className = 'badge ' + (r.status === CANT ? 'no' : r.status);
+      var first = (r.name || '').split(/\s+/)[0];
+      $('rsvpLine').textContent = r.status === 'Going' ? 'See you there, ' + first + '.'
+        : r.status === 'Maybe' ? 'Hope you can make it, ' + first + '.'
+        : 'Thanks for letting us know, ' + first + '.';
+      if (!editing && !$('fName').value) $('fName').value = r.name;
+      if (!sel.s) sel.s = r.status === CANT ? 'no' : r.status;
+    }
+    renderForm();
+  }
+
+  /* ---------- Saint card ---------- */
+  function whenText(t) {
+    if (!t) return '';
+    return /^\d{1,2}:\d{2}\s?[AP]M$/i.test(t) ? 'When the clock strikes ' + t : t;
+  }
+
+  function renderCard(m) {
+    var p = CARDS.palettes[m.palette] || CARDS.palettes.gold || ['#fbf6ea', '#2a2233', '#b9862c'];
+    var card = $('card');
+    card.style.setProperty('--c-bg', p[0]);
+    card.style.setProperty('--c-ink', p[1]);
+    card.style.setProperty('--c-acc', p[2]);
+    var icon = CARDS.icons[m.icon] || CARDS.icons.sparkles || '';
+    $('medal').innerHTML = icon;
+    $('wm').innerHTML = icon;
+    $('saint').textContent = m.name;
+    $('patron').textContent = m.patron ? 'Patron of ' + m.patron : '';
+    $('patron').hidden = !m.patron;
+    var lvl = $('lvl');
+    lvl.textContent = m.level || '';
+    lvl.hidden = !m.level;
+    lvl.style.color = LEVEL_COLORS[m.level] || '';
+    $('costume').textContent = m.costume || 'Get creative!';
+
+    var finds = m.finds || [];
+    var ul = $('finds'); ul.textContent = '';
+    finds.forEach(function (f) {
+      var li = document.createElement('li');
+      li.textContent = f.clue ? 'The patron of ' + f.clue : 'A saint with no clue yet. Ask the host!';
+      ul.appendChild(li);
+    });
+    ul.hidden = !m.findsReleased || !finds.length;
+    $('findSoon').hidden = !!m.findsReleased;
+    $('tFind').hidden = m.findsReleased && !finds.length;
+
+    $('tDrinks').hidden = !m.drinks;
+    if (m.drinks) {
+      var partners = (m.drinkPartners || []).join(' and ');
+      var accepted = store.get('saint-drinks-ok') === m.name;
+      $('drinksText').textContent = (accepted ? 'You’re on the drinks crew. Thank you! ' : 'This saint helps run the drinks tonight. ') +
+        (partners ? 'Your crew so far: ' + partners + '.' : 'You’re the first on the crew.') + (accepted ? '' : ' Up for it?');
+      $('drinksBtns').hidden = accepted;
+    }
+
+    $('announce').textContent = m.announce ? '“' + m.announce + '”' : '';
+    $('annWhen').textContent = whenText(m.announceTime);
+    $('annWhen').hidden = !m.announceTime;
+    $('tAnnounce').hidden = !m.announce;
+    $('activity').textContent = m.activity || '';
+    $('actWhen').textContent = whenText(m.activityTime);
+    $('actWhen').hidden = !m.activityTime;
+    $('tActivity').hidden = !m.activity;
+    pressed('.lvlchips button', 'data-sw', sel.l || m.level);
+  }
+
+  var changingEmail = false;
+  function renderEmail() {
+    var has = !!last.email;
+    $('emailForm').hidden = has && !changingEmail;
+    $('emailSet').hidden = !has || changingEmail;
+    $('emailShown').textContent = has ? 'Updates and your day-of reminder go to ' + last.email + '.' : '';
+    $('remindIntro').hidden = !(changingEmail || !has);
+  }
+
+  function render(animate) {
+    $('loading').hidden = true;
+    renderEvent(last.event);
+    renderGuests(last.guests);
+    renderRsvp();
+    renderEmail();
+    var st = last.rsvp && last.rsvp.status;
+    $('cantGo').hidden = !(st === CANT && !editing);
+    $('result').hidden = !(last.mine && st && st !== CANT);
+    if (!$('result').hidden) {
+      renderCard(last.mine);
+      if (animate) { var card = $('card'); card.classList.remove('flip'); void card.offsetWidth; card.classList.add('flip'); }
+    }
+    $('note').textContent = last.note || '';
+    $('note').hidden = !last.note || $('result').hidden;
+  }
+
+  function setBusy(on, label) {
+    busy = on;
+    document.querySelectorAll('button').forEach(function (b) {
+      if (on) { b.dataset.wasDisabled = b.disabled ? '1' : ''; b.disabled = true; }
+      else { b.disabled = b.dataset.wasDisabled === '1'; }
+    });
+    if (on && label) $('joinBtn').textContent = label;
+    if (!on) renderForm();
+  }
+
+  /* ---------- Actions ---------- */
+  document.querySelectorAll('.pick[data-s]').forEach(function (b) {
+    b.addEventListener('click', function () { sel.s = b.getAttribute('data-s'); renderForm(); });
+  });
+  document.querySelectorAll('.pick[data-g]').forEach(function (b) {
+    b.addEventListener('click', function () { sel.g = b.getAttribute('data-g'); store.set('saint-gender', sel.g); renderForm(); });
+  });
+  document.querySelectorAll('.level').forEach(function (b) {
+    b.addEventListener('click', function () { sel.l = b.getAttribute('data-l'); store.set('saint-level', sel.l); renderForm(); });
+  });
+
+  $('joinForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearError();
+    var name = $('fName').value.trim();
+    var coming = sel.s && sel.s !== 'no';
+    var needSaint = coming && !last.mine;
+    if (!sel.s) return showError('Step 1: are you going, maybe, or can’t make it?');
+    if (!name) { $('fName').focus(); return showError('Step 2: add your name so the host knows who’s coming.'); }
+    var email = $('fEmail').value.trim();
+    var emailStep = needSaint ? '5' : '3';
+    if (!email && !last.email) { $('fEmail').focus(); return showError('Step ' + emailStep + ': add your email so we can send you party updates.'); }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('fEmail').focus(); return showError('Step ' + emailStep + ': that email doesn’t look right.'); }
+    if (needSaint && !sel.g) return showError('Step 3: pick men’s or women’s saint.');
+    if (needSaint && !sel.l) return showError('Step 4: pick how bold you’re feeling.');
+    var status = sel.s === 'no' ? CANT : sel.s;
+    setBusy(true, needSaint ? 'Finding your saint…' : 'Saving…');
+    call('join', { token: token, name: name, status: status, email: email, gender: sel.g, level: sel.l, noDrinks: store.get('saint-nodrinks') === '1' })
+      .then(function (s) {
+        var gotNew = !last.mine && s.mine;
+        last = s; editing = false; $('fEmail').value = '';
+        render(gotNew);
+        if (gotNew) $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        else if (status !== CANT && !s.mine && s.note) showError(s.note + ' Pick a different level in step 4.');
+      })
+      .catch(function (err) { showError((err && err.message) || 'Could not save that. Try again.'); })
+      .then(function () { setBusy(false); });
+  });
+
+  $('findToggle').addEventListener('click', function () {
+    $('findForm').hidden = false; $('findHint').hidden = false; $('findEmail').focus();
+  });
+  $('findForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearError();
+    var v = $('findEmail').value.trim();
+    if (!v) { $('findEmail').focus(); return; }
+    setBusy(true);
+    $('findBtn').textContent = 'Finding…';
+    call('findMe', { token: token, email: v })
+      .then(function (s) {
+        last = s; editing = false; sel.s = ''; $('findEmail').value = '';
+        render(!!s.mine);
+        if (s.mine) $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(function (err) { showError((err && err.message) || 'Could not look that up. Try again.'); })
+      .then(function () { $('findBtn').textContent = 'Find'; setBusy(false); });
+  });
+  $('rsvpChange').addEventListener('click', function () { editing = true; $('fName').value = last.rsvp.name; sel.s = last.rsvp.status === CANT ? 'no' : last.rsvp.status; render(false); $('joinPane').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  $('cancelEdit').addEventListener('click', function () { editing = false; sel.s = ''; render(false); });
+
+  function claimAgain(level) {
+    if (busy) return;
+    clearError();
+    if (level) { sel.l = level; store.set('saint-level', level); }
+    setBusy(true);
+    $('shuffle').textContent = 'Shuffling…';
+    // Shuffle keeps the level the Guest chose (Surprise me is Any). With none, the server uses the saint's.
+    call('claim', { level: level || sel.l || '', token: token, noDrinks: store.get('saint-nodrinks') === '1' })
+      .then(function (c) {
+        last.mine = c.mine; last.counts = c.counts; last.note = c.note || '';
+        render(true);
+        if (!c.mine && c.note) showError(c.note + ' Pick a different level in step 4.');
+      })
+      .catch(function (e) { showError((e && e.message) || 'Something went wrong. Try again.'); })
+      .then(function () { $('shuffle').textContent = 'Shuffle'; setBusy(false); });
+  }
+  $('shuffle').addEventListener('click', function () { claimAgain(null); });
+  document.querySelectorAll('.lvlchips button').forEach(function (b) {
+    b.addEventListener('click', function () { claimAgain(b.getAttribute('data-sw')); });
+  });
+  $('drinksYes').addEventListener('click', function () { store.set('saint-drinks-ok', $('saint').textContent); renderCard(last.mine); });
+  $('drinksNo').addEventListener('click', function () { store.set('saint-nodrinks', '1'); claimAgain(null); });
+
+  $('emailForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = $('email').value.trim();
+    if (!v) return;
+    clearError();
+    $('emailSave').disabled = true;
+    call('saveEmail', { token: token, email: v })
+      .then(function (r) { last.email = r.email; changingEmail = false; renderEmail(); renderForm(); $('email').value = ''; })
+      .catch(function (err) { showError((err && err.message) || 'Could not save that. Try again.'); })
+      .then(function () { $('emailSave').disabled = false; });
+  });
+  $('emailChange').addEventListener('click', function () { changingEmail = true; renderEmail(); $('email').focus(); });
+
+  // The card link in a Guest's reminder (?card=<key>) links this Phone to them, as Find my saint does.
+  var cardKey = new URLSearchParams(location.search).get('card');
+  if (cardKey) history.replaceState(null, '', location.pathname + location.hash);
+
+  function refresh(first) {
+    var opening = first && cardKey;
+    (opening ? call('openCard', { token: token, card: cardKey }) : call('getState', { token: token }))
+      .catch(function (err) {
+        if (!opening) throw err;
+        showError((err && err.message) || 'That link didn’t open your card. Tap “Already RSVP’d? Find my saint” below.');
+        return call('getState', { token: token });
+      })
+      .then(function (s) {
+        if (first) {
+          last = s; render(!!(opening && s.mine));
+          if (opening && s.mine) $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+        var keepNote = last.note;
+        // The Host can free this Guest's saint or remove them: then the whole page changes.
+        var changed = !s.mine !== !last.mine || !s.rsvp !== !last.rsvp;
+        last = s; last.note = keepNote;
+        if (changed) { render(false); return; }
+        renderEvent(s.event); renderGuests(s.guests); renderLevelCounts();
+        if (s.mine && !$('result').hidden) renderCard(s.mine);
+      })
+      .catch(function () { if (first) { $('loading').hidden = true; showError('Could not reach the party list. Reload to try again.'); } });
+  }
+  // Cards need their designs before the first render; without them they fall back to gold.
+  fetch('/cards.json')
+    .then(function (res) { return res.json(); })
+    .then(function (c) { CARDS = c; })
+    .catch(function () {})
+    .then(function () { refresh(true); });
+  setInterval(function () { if (!busy && !document.hidden && !editing) refresh(false); }, 20000);
+</script>
+</body>
+</html>

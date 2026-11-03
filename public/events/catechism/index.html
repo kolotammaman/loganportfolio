@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catechism Quick Reference</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #e9e1d2; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; font-family: 'EB Garamond', Georgia, serif; }
+  .tools { font: 14px 'EB Garamond', Georgia, serif; color: #4a3a20; }
+  .tools button { font: 600 12px 'Cinzel', serif; letter-spacing: 1px; color: #fdf8f0; background: #6b4e25; border: 0; border-radius: 3px; padding: 9px 16px; cursor: pointer; margin-left: 8px; }
+  .page { width: 100%; max-width: 8.5in; background: #fdf8f0; color: #2a1f0e; padding: 0.45in 0.55in 0.35in; border: 1px solid #c8b89a; position: relative; box-shadow: 0 6px 24px rgba(60,40,10,.15); }
+  .page::before { content: ''; position: absolute; inset: 8px; border: 1px solid #c8b89a; pointer-events: none; opacity: .5; }
+  .corner { position: absolute; width: 28px; height: 28px; opacity: .6; }
+  .corner-tl { top: 12px; left: 12px; } .corner-tr { top: 12px; right: 12px; transform: scaleX(-1); }
+  .corner-bl { bottom: 12px; left: 12px; transform: scaleY(-1); } .corner-br { bottom: 12px; right: 12px; transform: scale(-1); }
+  .header { text-align: center; margin-bottom: 14px; border-bottom: 1.5px solid #8b6c3c; padding-bottom: 12px; }
+  .supertitle { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: #8b6c3c; text-transform: uppercase; margin-bottom: 4px; }
+  .title { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 600; color: #1e1208; letter-spacing: 1px; line-height: 1.2; margin-bottom: 3px; }
+  .subtitle { font-style: italic; font-size: 14px; color: #7a5c30; }
+  .orn { text-align: center; font-size: 14px; color: #8b6c3c; margin: 0 0 10px; letter-spacing: 8px; }
+  .intro { text-align: center; font-style: italic; font-size: 12.5px; color: #6b4e25; margin-bottom: 14px; line-height: 1.45; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; }
+  .part { border-left: 2.5px solid #8b6c3c; padding-left: 10px; }
+  .part.wide { grid-column: 1 / -1; }
+  .label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: #8b6c3c; text-transform: uppercase; }
+  .ptitle { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; color: #1e1208; line-height: 1.2; margin-bottom: 4px; }
+  ul { list-style: none; }
+  li { font-size: 13px; line-height: 1.35; padding: 2px 0; border-bottom: .5px solid #d9c9ad; display: flex; gap: 8px; align-items: baseline; }
+  li:last-child { border-bottom: 0; }
+  li.sub { padding-left: 14px; font-size: 12.5px; color: #4a3a20; }
+  .num { font-family: 'Cinzel', serif; font-size: 10px; color: #8b6c3c; min-width: 70px; flex-shrink: 0; }
+  .wide ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
+  .footer { margin-top: 14px; padding-top: 8px; border-top: 1px solid #c8b89a; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .fnote { font-style: italic; font-size: 11px; color: #7a5c30; line-height: 1.45; }
+  @media (max-width: 640px) { .grid, .wide ul { grid-template-columns: 1fr; } .page { padding: 28px 20px; } }
+  @page { size: letter; margin: 0; }
+  @media print { body { background: none; padding: 0; } .tools { display: none; } .page { box-shadow: none; border: 0; max-width: none; width: 8.5in; height: 11in; } }
+</style>
+</head>
+<body>
+<p class="tools">One printable page. <button type="button" onclick="window.print()">Print or save as PDF</button></p>
+<main class="page">
+  <svg class="corner corner-tl" viewBox="0 0 28 28" aria-hidden="true"><path d="M2 26 L2 2 L26 2" stroke="#8b6c3c" stroke-width="1.5" fill="none"/><path d="M2 10 L10 2" stroke="#8b6c3c" stroke-width=".75" opacity=".5"/><circle cx="2" cy="2" r="2" fill="#8b6c3c" opacity=".7"/></svg>
+  <svg class="corner corner-tr" viewBox="0 0 28 28" aria-hidden="true"><path d="M2 26 L2 2 L26 2" stroke="#8b6c3c" stroke-width="1.5" fill="none"/><circle cx="2" cy="2" r="2" fill="#8b6c3c" opacity=".7"/></svg>
+  <svg class="corner corner-bl" viewBox="0 0 28 28" aria-hidden="true"><path d="M2 26 L2 2 L26 2" stroke="#8b6c3c" stroke-width="1.5" fill="none"/><circle cx="2" cy="2" r="2" fill="#8b6c3c" opacity=".7"/></svg>
+  <svg class="corner corner-br" viewBox="0 0 28 28" aria-hidden="true"><path d="M2 26 L2 2 L26 2" stroke="#8b6c3c" stroke-width="1.5" fill="none"/><circle cx="2" cy="2" r="2" fill="#8b6c3c" opacity=".7"/></svg>
+
+  <header class="header">
+    <div class="supertitle">Catechismus Catholicae Ecclesiae</div>
+    <h1 class="title">Catechism of the Catholic Church</h1>
+    <div class="subtitle">Quick reference to its structure and paragraph numbers</div>
+  </header>
+  <div class="orn" aria-hidden="true">✦ ✝ ✦</div>
+  <p class="intro">A Prologue and four Parts: what we believe, how we celebrate it, how we live it, and how we pray.<br>Numbers are paragraph (¶) ranges.</p>
+
+  <div class="grid">
+    <section class="part">
+      <div class="label">Prologue</div>
+      <div class="ptitle">Introduction</div>
+      <ul>
+        <li><span class="num">¶ 1–3</span>The life of man: to know and love God</li>
+        <li><span class="num">¶ 4–10</span>Handing on the faith: catechesis</li>
+        <li><span class="num">¶ 11–25</span>Aim, audience and structure of the Catechism</li>
+      </ul>
+    </section>
+
+    <section class="part">
+      <div class="label">Part One · ¶ 26–1065</div>
+      <div class="ptitle">The Profession of Faith</div>
+      <ul>
+        <li><span class="num">¶ 26–184</span>Section One: "I believe," "We believe"</li>
+        <li class="sub"><span class="num">¶ 50–141</span>Revelation, Tradition and Scripture</li>
+        <li><span class="num">¶ 185–1065</span>Section Two: the Creed, article by article</li>
+        <li class="sub"><span class="num">¶ 199–421</span>God the Father, creation, the Fall</li>
+        <li class="sub"><span class="num">¶ 422–682</span>Jesus Christ: Incarnation to Second Coming</li>
+        <li class="sub"><span class="num">¶ 683–1065</span>Holy Spirit, Church, communion of saints, resurrection, eternal life</li>
+      </ul>
+    </section>
+
+    <section class="part">
+      <div class="label">Part Two · ¶ 1066–1690</div>
+      <div class="ptitle">The Celebration of the Christian Mystery</div>
+      <ul>
+        <li><span class="num">¶ 1066–1209</span>Section One: the sacramental economy</li>
+        <li><span class="num">¶ 1210–1690</span>Section Two: the seven sacraments</li>
+        <li class="sub"><span class="num">¶ 1213–1321</span>Baptism and Confirmation</li>
+        <li class="sub"><span class="num">¶ 1322–1419</span>The Eucharist</li>
+        <li class="sub"><span class="num">¶ 1420–1532</span>Healing: Penance, Anointing of the Sick</li>
+        <li class="sub"><span class="num">¶ 1533–1666</span>Service: Holy Orders, Matrimony</li>
+        <li class="sub"><span class="num">¶ 1667–1690</span>Sacramentals and Christian funerals</li>
+      </ul>
+    </section>
+
+    <section class="part">
+      <div class="label">Part Three · ¶ 1691–2557</div>
+      <div class="ptitle">Life in Christ</div>
+      <ul>
+        <li><span class="num">¶ 1691–2051</span>Section One: our vocation, life in the Spirit</li>
+        <li class="sub"><span class="num">¶ 1716–1876</span>Beatitudes, freedom, conscience, virtue, sin</li>
+        <li class="sub"><span class="num">¶ 1877–1948</span>The human community</li>
+        <li class="sub"><span class="num">¶ 1949–2051</span>Moral law, grace, the Church as teacher</li>
+        <li><span class="num">¶ 2052–2557</span>Section Two: the Ten Commandments</li>
+        <li class="sub"><span class="num">¶ 2083–2195</span>Commandments 1–3: love of God</li>
+        <li class="sub"><span class="num">¶ 2196–2557</span>Commandments 4–10: love of neighbor</li>
+      </ul>
+    </section>
+
+    <section class="part wide">
+      <div class="label">Part Four · ¶ 2558–2865</div>
+      <div class="ptitle">Christian Prayer</div>
+      <ul>
+        <li><span class="num">¶ 2558–2758</span>Section One: prayer in the Christian life</li>
+        <li><span class="num">¶ 2759–2865</span>Section Two: the Lord's Prayer</li>
+        <li class="sub"><span class="num">¶ 2566–2649</span>How prayer is revealed in Scripture</li>
+        <li class="sub"><span class="num">¶ 2777–2802</span>"Our Father who art in heaven"</li>
+        <li class="sub"><span class="num">¶ 2650–2696</span>The tradition of prayer</li>
+        <li class="sub"><span class="num">¶ 2803–2854</span>The seven petitions</li>
+        <li class="sub"><span class="num">¶ 2697–2758</span>Vocal prayer, meditation, contemplation</li>
+        <li class="sub"><span class="num">¶ 2855–2865</span>The final doxology and "Amen"</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <p class="fnote">Promulgated by Pope St. John Paul II on 11 October 1992; Latin typical edition 1997. Each section ends with an "In Brief" summary, useful for quick review. 2,865 paragraphs in all.</p>
+    <div class="orn" aria-hidden="true" style="margin:0">✦ ✝ ✦</div>
+  </footer>
+</main>
+</body>
+</html>

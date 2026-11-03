@@ -1,0 +1,58 @@
+---
+// Each piece lives as its own self-contained page under /events/.
+const pieces = [
+  {
+    title: 'Saint Party',
+    href: '/events/saint-party/',
+    kind: 'Working demo',
+    desc: "RSVP and saint-assignment web app for a 30 to 60 guest All Saints' Eve party. Every guest gets a saint to dress as and a mission for the night. No saint goes to two people, and the demo runs entirely in your browser.",
+  },
+  {
+    title: 'Iron Dip',
+    href: '/events/iron-dip/scorecard.pdf',
+    kind: 'Scorecard, PDF',
+    desc: "An Iron Chef-style dip cook-off: six teams, 40 minutes, two mystery ingredients at halftime, three judges, and a curtain reveal. The judges' scorecard is linked here, with the host script below.",
+  },
+  {
+    title: 'Easter Sunday Party',
+    href: '/events/easter-flyer/',
+    kind: 'Flyer',
+    desc: "Flyer for the Catholic men's group at St. Agatha-St. James: snacks, games, and music after the luncheon that follows 11:30 Mass.",
+  },
+  {
+    title: 'Catechism, one page',
+    href: '/events/catechism/',
+    kind: 'Print reference',
+    desc: 'The Catechism of the Catholic Church mapped on a single letter-size page, with paragraph ranges checked against its structure.',
+  },
+];
+---
+
+<section id="events" class="sec" aria-labelledby="events-h">
+  <div class="wrap sec-grid">
+    <div class="sec-head"><span class="label"><span class="num">04</span>Events &amp; faith</span></div>
+    <div class="sec-body reveal">
+      <h2 id="events-h">Programs for <em>people, in person.</em></h2>
+      <div class="rows">
+        {pieces.map((p, i) => (
+          <a class="row" href={p.href} target="_blank" rel="noopener">
+            <span class="row-no">{String(i + 1).padStart(2, '0')}</span>
+            <span>
+              <span class="row-title">{p.title}</span>
+              <span class="row-desc">{p.desc}</span>
+            </span>
+            <span class="row-meta">
+              <span class="label">{p.kind}</span><br />
+              <span class="row-arrow" aria-hidden="true">&nearr;</span>
+            </span>
+          </a>
+        ))}
+      </div>
+      <p class="label muted">
+        Iron Dip host script:
+        <a href="/events/iron-dip/host-script.pdf" target="_blank" rel="noopener"><u>open PDF</u></a>
+        &nbsp;/&nbsp; The Saint Party demo is sample data; nothing you enter leaves your device.
+      </p>
+    </div>
+  </div>
+</section>

@@ -5,6 +5,8 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og-image.jpg', Astro.site).href;
 ---
 
 <!doctype html>
@@ -12,369 +14,73 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      GitHub Pages cannot send response headers, so the policy lives in a meta tag.
+      Everything is first-party and self-hosted: no third-party scripts, fonts, or analytics.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="description" content={description} />
     <meta name="author" content="Logan Moseley" />
-    <meta name="theme-color" content="#EDE9E0" />
+    <meta name="theme-color" content="#F1EEE6" />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Archivo:ital,wght@0,300..900;1,300..900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preload" href="/fonts/SportingGrotesque-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/SortsMillGoudy-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Logan Moseley | Project & Program Operations" />
-    <meta property="og:description" content="I coordinate programs, vendors, and cross-functional teams at Penn Dental Medicine. No chaos, no oversight needed. Pursuing B.A.A.S. in Leadership at Penn." />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class="bg-bg text-text font-body antialiased">
-    <a
-      href="#main-content"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-accent focus:text-white focus:px-4 focus:py-2 focus:rounded-lg"
-    >
-      Skip to main content
-    </a>
+  <body>
+    <a href="#main-content" class="skip">Skip to main content</a>
+    <slot />
 
-    <!-- Particle constellation canvas — fixed behind all content -->
-    <canvas
-      id="particle-canvas"
-      aria-hidden="true"
-      style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;will-change:transform;transform:translateZ(0);"
-    ></canvas>
-
-    <div style="position:relative;z-index:1;">
-      <slot />
-    </div>
-
-    <!-- Particle constellation + organic blob ambient layer -->
     <script>
-      (function () {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-        const canvas = document.getElementById('particle-canvas') as HTMLCanvasElement;
-        const ctx = canvas.getContext('2d')!;
-
-        let W = 0, H = 0;
-        const isMobile = window.innerWidth < 768;
-        function resize() {
-          W = canvas.width  = window.innerWidth;
-          H = canvas.height = window.innerHeight;
-        }
-        resize();
-        // iOS Safari fires 'resize' constantly as the address bar hides/shows during
-        // scroll — each event clears the canvas and causes a flash. On mobile we only
-        // need to resize on a true orientation change; on desktop, resize freely.
-        if (isMobile) {
-          window.addEventListener('orientationchange', () => setTimeout(resize, 300), { passive: true });
-        } else {
-          window.addEventListener('resize', resize, { passive: true });
-        }
-
-        // ── Color primaries ──
-        type RGB = [number, number, number];
-        const NEUTRAL: RGB = [17,  17,  16];
-        const NAVY:    RGB = [28,  53,  87];
-        const GOLD:    RGB = [196, 149, 58];
-        const ORANGE:  RGB = [215, 75,  15];
-        const RUST:    RGB = [178, 48,  22];
-
-        type ColorType = 'neutral' | 'navy' | 'gold' | 'orange' | 'shift';
-        const COLOR_POOL: ColorType[] = [
-          'neutral', 'neutral', 'navy', 'gold', 'orange',
-          'shift', 'shift', 'shift', 'shift', 'shift',
-        ];
-        const SHIFT_PAIRS: [RGB, RGB][] = [
-          [NAVY, GOLD], [NAVY, GOLD],
-          [GOLD, ORANGE], [GOLD, ORANGE],
-          [NAVY, ORANGE],
-          [ORANGE, RUST],
-        ];
-
-        // ── Tier properties (size + alpha per depth tier) ──
-        const TIERS = [
-          { rMin: 0.7,  rMax:  1.2, baseAlpha: 0.13 }, // 0 far
-          { rMin: 1.3,  rMax:  2.4, baseAlpha: 0.22 }, // 1 mid
-          { rMin: 3.0,  rMax:  5.5, baseAlpha: 0.32 }, // 2 near
-          { rMin: 7.0,  rMax: 13.0, baseAlpha: 0.40 }, // 3 feature
-        ];
-
-        interface Particle {
-          x: number; y: number; baseR: number;
-          vx: number; vy: number; baseAlpha: number;
-          breathPhase: number; breathRate: number; breathDepth: number;
-          sizePhase:   number; sizeRate:   number;
-          colorType: ColorType; colorPhase: number; colorRate: number;
-          shiftFrom: RGB; shiftTo: RGB;
-          boostStartTime: number; boostDuration: number;
-        }
-
-        // ── Constellation definitions ──
-        // cx/cy: group center as fraction of viewport W/H
-        // vx/vy: group drift in px/frame (very slow so shapes hold)
-        // nodes: pixel offsets from group center + depth tier
-        interface CNode { dx: number; dy: number; tier: number; }
-        interface CDef  { cx: number; cy: number; vx: number; vy: number; nodes: CNode[]; }
-
-        // Desktop: 5 constellations — Orion-like, triangle, square, pentagon, diamond
-        const DESKTOP_DEFS: CDef[] = [
-          { cx:0.18, cy:0.22, vx: 0.012, vy: 0.008, nodes: [
-            {dx:   0, dy: -55, tier:2}, {dx:  45, dy: -10, tier:1}, {dx: -45, dy: -10, tier:1},
-            {dx:   0, dy:  45, tier:3}, {dx:  72, dy:  62, tier:1}, {dx: -72, dy:  62, tier:1},
-          ]},
-          { cx:0.78, cy:0.28, vx:-0.010, vy: 0.012, nodes: [
-            {dx:   0, dy: -65, tier:3}, {dx:  58, dy:  32, tier:2}, {dx: -58, dy:  32, tier:1},
-          ]},
-          { cx:0.46, cy:0.54, vx: 0.008, vy:-0.010, nodes: [
-            {dx: -50, dy: -50, tier:1}, {dx:  50, dy: -50, tier:2},
-            {dx:  50, dy:  50, tier:1}, {dx: -50, dy:  50, tier:3},
-          ]},
-          { cx:0.82, cy:0.74, vx:-0.012, vy:-0.008, nodes: [
-            {dx:   0, dy: -60, tier:2}, {dx:  57, dy: -19, tier:1}, {dx:  35, dy:  48, tier:1},
-            {dx: -35, dy:  48, tier:2}, {dx: -57, dy: -19, tier:3},
-          ]},
-          { cx:0.20, cy:0.76, vx: 0.014, vy:-0.006, nodes: [
-            {dx:   0, dy: -65, tier:1}, {dx:  58, dy:   0, tier:3},
-            {dx:   0, dy:  52, tier:1}, {dx: -58, dy:   0, tier:2},
-          ]},
-        ];
-
-        function makeParticle(x: number, y: number, tier: number, vx: number, vy: number): Particle {
-          const T = TIERS[tier];
-          const colorType = COLOR_POOL[Math.floor(Math.random() * COLOR_POOL.length)];
-          const pair = SHIFT_PAIRS[Math.floor(Math.random() * SHIFT_PAIRS.length)];
-          return {
-            x, y,
-            baseR:       T.rMin + Math.random() * (T.rMax - T.rMin),
-            vx, vy,
-            baseAlpha:   T.baseAlpha,
-            breathPhase: Math.random() * Math.PI * 2,
-            breathRate:  0.28 + Math.random() * 0.85,
-            breathDepth: 0.42 + Math.random() * 0.36,
-            sizePhase:   Math.random() * Math.PI * 2,
-            sizeRate:    0.10 + Math.random() * 0.30,
-            colorType,
-            colorPhase:  Math.random() * Math.PI * 2,
-            colorRate:   0.05 + Math.random() * 0.13,
-            shiftFrom: pair[0], shiftTo: pair[1],
-            boostStartTime: 15 + Math.random() * 50,
-            boostDuration:   5 + Math.random() * 7,
-          };
-        }
-
-        const particles: Particle[] = [];
-        if (isMobile) {
-          // Mobile: fully random scatter + independent velocities.
-          // Constellations look rigid on small screens; random drift feels alive.
-          const ML = [
-            { n:4, tier:0, spd:0.10 },
-            { n:5, tier:1, spd:0.18 },
-            { n:3, tier:2, spd:0.28 },
-            { n:2, tier:3, spd:0.22 },
-          ];
-          for (const L of ML) {
-            for (let i = 0; i < L.n; i++) {
-              particles.push(makeParticle(
-                Math.random() * W, Math.random() * H, L.tier,
-                (Math.random() - 0.5) * L.spd,
-                (Math.random() - 0.5) * L.spd,
-              ));
-            }
-          }
-        } else {
-          // Desktop: constellation groups — geometric shapes that drift slowly together
-          for (const def of DESKTOP_DEFS) {
-            const cx = def.cx * W, cy = def.cy * H;
-            for (const node of def.nodes) {
-              const jx = (Math.random() - 0.5) * 0.016;
-              const jy = (Math.random() - 0.5) * 0.016;
-              particles.push(makeParticle(cx + node.dx, cy + node.dy, node.tier, def.vx + jx, def.vy + jy));
-            }
-          }
-        }
-        const COUNT = particles.length;
-
-        // ── Blobs — with occasional slow pulse ──
-        type BlobPulse = 'idle' | 'swell' | 'settle';
-        interface Blob {
-          x:number; y:number; r:number; vx:number; vy:number;
-          rgb: string; baseA: number;  // color components split for pulse math
-          pulseA: number;              // current multiplier (1 = normal)
-          pulseState: BlobPulse; pulseStart: number; nextPulse: number;
-        }
-        const blobs: Blob[] = [
-          { x:W*0.10,y:H*0.25,r:340,vx: 0.020,vy: 0.028,rgb:'28,53,87',  baseA:0.10,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:40 +Math.random()*80 },
-          { x:W*0.80,y:H*0.52,r:400,vx:-0.024,vy: 0.018,rgb:'18,38,72',  baseA:0.07,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:60 +Math.random()*90 },
-          { x:W*0.50,y:H*0.76,r:270,vx: 0.026,vy:-0.022,rgb:'196,149,58',baseA:0.09,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:50 +Math.random()*70 },
-          { x:W*0.72,y:H*0.12,r:310,vx:-0.018,vy: 0.026,rgb:'215,75,15', baseA:0.09,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:70 +Math.random()*80 },
-          { x:W*0.28,y:H*0.65,r:230,vx: 0.030,vy: 0.020,rgb:'225,115,25',baseA:0.08,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:45 +Math.random()*75 },
-          { x:W*0.88,y:H*0.88,r:260,vx:-0.022,vy:-0.018,rgb:'178,48,22', baseA:0.07,pulseA:1,pulseState:'idle',pulseStart:0,nextPulse:55 +Math.random()*85 },
-        ];
-
-        const MAX_DIST = 130;
-
-        // ── Helpers ──
-        function breathVal(p: Particle, t: number): number {
-          return 1 - p.breathDepth + p.breathDepth * (Math.sin(t * p.breathRate + p.breathPhase) * 0.5 + 0.5);
-        }
-        function currentR(p: Particle, t: number): number {
-          // Two incommensurable sine waves — their interference creates an irregular,
-          // organic pulse that never exactly repeats, unlike a single clean sine.
-          const s1 = Math.sin(t * p.sizeRate + p.sizePhase);
-          const s2 = Math.sin(t * p.sizeRate * 2.414 + p.sizePhase * 1.31); // √2+1 keeps them out of sync
-          const combined = s1 * 0.68 + s2 * 0.32;                           // weighted blend
-          return p.baseR * (0.65 + 0.35 * (combined * 0.5 + 0.5));
-        }
-        function lerpRGB(a: RGB, b: RGB, mix: number): RGB {
-          return [
-            Math.round(a[0] + (b[0] - a[0]) * mix),
-            Math.round(a[1] + (b[1] - a[1]) * mix),
-            Math.round(a[2] + (b[2] - a[2]) * mix),
-          ];
-        }
-        function dotColor(p: Particle, t: number, alpha: number): string {
-          let rgb: RGB;
-          if      (p.colorType === 'neutral') rgb = NEUTRAL;
-          else if (p.colorType === 'navy')    rgb = NAVY;
-          else if (p.colorType === 'gold')    rgb = GOLD;
-          else if (p.colorType === 'orange')  rgb = ORANGE;
-          else {
-            const mix = Math.sin(t * p.colorRate + p.colorPhase) * 0.5 + 0.5;
-            rgb = lerpRGB(p.shiftFrom, p.shiftTo, mix);
-          }
-          return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha.toFixed(3)})`;
-        }
-        // Speed boost: smooth bell-curve pulse, barely perceptible (+35% peak)
-        function speedBoost(p: Particle, t: number): number {
-          if (t < p.boostStartTime) return 1;
-          const elapsed = t - p.boostStartTime;
-          if (elapsed > p.boostDuration) {
-            p.boostStartTime = t + 30 + Math.random() * 60;
-            p.boostDuration  = 5  + Math.random() * 7;
-            return 1;
-          }
-          return 1 + 0.35 * Math.sin(Math.PI * elapsed / p.boostDuration);
-        }
-
-        let lastFrameTime = 0;
-        const FRAME_MIN = isMobile ? 1000 / 30 : 0; // 30fps cap on mobile
-
-        function frame(now: number) {
-          if (isMobile && now - lastFrameTime < FRAME_MIN) {
-            requestAnimationFrame(frame);
-            return;
-          }
-          lastFrameTime = now;
-          const t = now / 1000;
-
-          ctx.clearRect(0, 0, W, H);
-
-          // — Blobs — (mobile uses first 4 only) —
-          const blobsToRender = isMobile ? blobs.slice(0, 4) : blobs;
-          for (const b of blobsToRender) {
-            // Pulse: idle → swell (10s to 2.2×) → settle (16s back to 1×) → idle
-            if (b.pulseState === 'idle' && t >= b.nextPulse) {
-              b.pulseState = 'swell'; b.pulseStart = t;
-            } else if (b.pulseState === 'swell') {
-              b.pulseA = 1 + 1.2 * Math.min(1, (t - b.pulseStart) / 10);
-              if (t - b.pulseStart >= 10) { b.pulseState = 'settle'; b.pulseStart = t; }
-            } else if (b.pulseState === 'settle') {
-              b.pulseA = 2.2 - 1.2 * Math.min(1, (t - b.pulseStart) / 16);
-              if (t - b.pulseStart >= 16) {
-                b.pulseA = 1; b.pulseState = 'idle';
-                b.nextPulse = t + 60 + Math.random() * 90; // 60–150s until next pulse
-              }
-            }
-            const alpha = (b.baseA * b.pulseA).toFixed(3);
-            const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-            g.addColorStop(0, `rgba(${b.rgb},${alpha})`);
-            g.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.beginPath();
-            ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-            ctx.fillStyle = g;
-            ctx.fill();
-            b.x += b.vx; b.y += b.vy;
-            if (b.x < -b.r)    b.x = W + b.r;
-            if (b.x > W + b.r) b.x = -b.r;
-            if (b.y < -b.r)    b.y = H + b.r;
-            if (b.y > H + b.r) b.y = -b.r;
-          }
-
-          const breathVals = particles.map(p => breathVal(p, t));
-
-          // — Connections — trimmed to dot edges so lines don't bleed through circles —
-          // Mobile now has only ~11 nodes so O(n²) = ~121 checks per frame — trivial.
-          {
-            for (let i = 0; i < COUNT; i++) {
-              for (let j = i + 1; j < COUNT; j++) {
-                const dx = particles[j].x - particles[i].x;
-                const dy = particles[j].y - particles[i].y;
-                const d  = Math.sqrt(dx * dx + dy * dy);
-                if (d < MAX_DIST) {
-                  const avgBreath = (breathVals[i] + breathVals[j]) * 0.5;
-                  const avgAlpha  = (particles[i].baseAlpha + particles[j].baseAlpha) * 0.5;
-                  const lineAlpha = avgAlpha * avgBreath * (1 - d / MAX_DIST) * 1.1;
-                  // Unit vector from i → j; trim each end by its dot's current radius
-                  const ux = dx / d, uy = dy / d;
-                  const ri = currentR(particles[i], t);
-                  const rj = currentR(particles[j], t);
-                  ctx.beginPath();
-                  ctx.moveTo(particles[i].x + ux * ri, particles[i].y + uy * ri);
-                  ctx.lineTo(particles[j].x - ux * rj, particles[j].y - uy * rj);
-                  ctx.strokeStyle = `rgba(17,17,16,${lineAlpha.toFixed(3)})`;
-                  ctx.lineWidth = 0.5;
-                  ctx.stroke();
-                }
-              }
-            }
-          }
-
-          // — Draw dots —
-          for (let i = 0; i < COUNT; i++) {
-            const p = particles[i];
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, currentR(p, t), 0, Math.PI * 2);
-            ctx.fillStyle = dotColor(p, t, p.baseAlpha * breathVals[i]);
-            ctx.fill();
-          }
-
-          // — Move particles —
-          for (const p of particles) {
-            const boost = speedBoost(p, t);
-            p.x += p.vx * boost; p.y += p.vy * boost;
-            if (p.x < -14)    p.x = W + 14;
-            if (p.x > W + 14) p.x = -14;
-            if (p.y < -14)    p.y = H + 14;
-            if (p.y > H + 14) p.y = -14;
-          }
-
-          requestAnimationFrame(frame);
-        }
-
-        requestAnimationFrame(frame);
-      })();
-    </script>
-
-    <!-- Scroll reveal observer -->
-    <script>
-      // requestAnimationFrame defers class addition to the start of the next
-      // render frame. Without it, classList.add fires mid-scroll-callback which
-      // can land mid-frame on mobile, causing a visible stutter as the browser
-      // recalculates styles during an already-busy scroll frame.
-      const observer = new IntersectionObserver(
+      // Reveal on scroll (opacity only, so it never fights the scroll thread)
+      const io = new IntersectionObserver(
         (entries) => {
-          const visible = entries.filter((e) => e.isIntersecting);
-          if (!visible.length) return;
-          requestAnimationFrame(() => {
-            visible.forEach((entry) => {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
-            });
-          });
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+          }
         },
-        { threshold: 0.06, rootMargin: '0px 0px -20px 0px' }
+        { threshold: 0.05 }
       );
-      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      // Philadelphia clock in the masthead
+      const clock = document.getElementById('clock');
+      if (clock) {
+        const fmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/New_York',
+          hour: 'numeric',
+          minute: '2-digit',
+        });
+        const tick = () => (clock.textContent = `Philadelphia ${fmt.format(new Date())}`);
+        tick();
+        setInterval(tick, 15000);
+      }
+
+      // Scroll-spy for the masthead links
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.mast nav a'));
+      const secs = links
+        .map((a) => document.querySelector<HTMLElement>(a.getAttribute('href') ?? ''))
+        .filter((s): s is HTMLElement => !!s);
+      const spy = () => {
+        const mid = window.scrollY + window.innerHeight * 0.35;
+        let active = '';
+        for (const s of secs) if (s.offsetTop <= mid) active = s.id;
+        links.forEach((a) => a.setAttribute('aria-current', String(a.getAttribute('href') === `#${active}`)));
+      };
+      window.addEventListener('scroll', spy, { passive: true });
+      spy();
     </script>
   </body>
 </html>

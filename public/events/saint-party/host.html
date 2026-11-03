@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="vendor/sql-wasm.js"></script>
+<script src="demo.js"></script>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Saint Party: Host</title>
+<style>
+  :root {
+    --bg: #14101c; --bg2: #1f1830; --muted: #b9adc9;
+    --gold: #e7b75a; --gold-deep: #b9862c; --ok: #8fd6a4; --bad: #ff9b85;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(120% 80% at 50% 0%, #2c2142 0%, var(--bg) 60%) fixed, var(--bg);
+    color: #f3ecff; font-family: system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased; display: flex; justify-content: center; padding: 24px 16px 48px;
+  }
+  main { width: 100%; max-width: 460px; }
+  .eyebrow { letter-spacing: .22em; text-transform: uppercase; font-size: 11px; color: var(--gold); margin: 0 0 4px; }
+  h1 { font-family: Georgia, serif; font-size: 36px; margin: 0 0 16px; }
+  h2 { font-family: Georgia, serif; font-size: 24px; margin: 28px 0 10px; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat b { display: block; font-size: 22px; }
+  .stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+  .stat.low b { color: var(--bad); }
+
+  label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+  button {
+    width: 100%; font: 600 16px system-ui, sans-serif; border: 0; border-radius: 12px; padding: 14px;
+    background: linear-gradient(180deg, var(--gold), var(--gold-deep)); color: #22180a; cursor: pointer;
+  }
+  button:disabled { opacity: .55; }
+
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 2px; border-bottom: 1px solid rgba(255,255,255,.07); font-size: 15px; }
+  li .g { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  li.taken .n { color: var(--muted); text-decoration: line-through; }
+  .pill { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: rgba(143,214,164,.15); color: var(--ok); }
+  li.taken .pill { background: rgba(255,255,255,.06); color: var(--muted); }
+  .muted { color: var(--muted); font-size: 13px; }
+  .panel { background: var(--bg2); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 16px; }
+  .panel .muted { margin: 0 0 12px; font-size: 14px; line-height: 1.45; }
+  .panel textarea {
+    width: 100%; font: 15px/1.45 system-ui, sans-serif; color: #fff; background: #120e19;
+    border: 1px solid rgba(255,255,255,.15); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;
+    min-height: 180px; resize: vertical;
+  }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .btnrow button { width: auto; flex: 1 1 140px; }
+  .rmsg { font-size: 14px; min-height: 20px; margin: 0; }
+  .rmsg.ok { color: var(--ok); } .rmsg.bad { color: var(--bad); }
+
+  li .acts { display: flex; align-items: center; gap: 8px; }
+  li button.edit { width: auto; padding: 6px 12px; font-size: 13px; border-radius: 999px; }
+  li.parked .n { color: var(--muted); font-style: italic; }
+  li.parked .pill { background: rgba(231,183,90,.15); color: var(--gold); }
+  .panel input[type=text], .panel input[type=email], .panel input[type=datetime-local], .panel select {
+    width: 100%; font: 15px system-ui, sans-serif; color: #fff; background: #120e19;
+    border: 1px solid rgba(255,255,255,.15); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;
+  }
+  #editor textarea { min-height: 70px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #f3ecff; margin-bottom: 12px; }
+  .check input { width: 20px; height: 20px; }
+  button.quiet { background: rgba(255,255,255,.08); color: #f3ecff; }
+  button.danger { background: rgba(255,155,133,.15); color: var(--bad); }
+  .preview { border-radius: 14px; padding: 14px; margin-bottom: 12px; display: flex; gap: 12px; align-items: center; }
+  .preview .medal { width: 44px; height: 44px; flex: none; }
+  .preview .medal svg { width: 100%; height: 100%; }
+  .preview b { display: block; font-family: Georgia, serif; font-size: 20px; }
+  .preview span { font-size: 13px; }
+  .show li { display: grid; grid-template-columns: 78px 1fr; align-items: start; gap: 10px; }
+  .show .t { font-weight: 600; color: var(--gold); font-size: 14px; }
+  .show .d { font-size: 14px; line-height: 1.4; margin-top: 2px; }
+  .show.loose li { grid-template-columns: 1fr; }
+  .show li.g { display: block; grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
+  .show .g { white-space: normal; }
+</style>
+</head>
+<body>
+<div style="position:relative;z-index:50;background:#111;color:#f3ecff;font:13px/1.45 system-ui,sans-serif;padding:10px 16px;text-align:center">
+Demo of the Saint Party host page. The real party logic runs right in your browser, and your RSVP and saint are saved only on this device. Nobody gets an email.
+<button type="button" onclick="saintPartyDemoReset()" style="margin-left:8px;font:inherit;color:#111;background:#e7b75a;border:0;border-radius:6px;padding:3px 10px;cursor:pointer">Start over</button>
+<a href="index.html" style="color:#e7b75a;margin-left:8px">Back to the guest invite</a></div>
+
+<main>
+  <p class="eyebrow">Host only</p>
+  <h1>Saint Party</h1>
+
+  <div class="stats">
+    <div class="stat" id="sLeft"><b>–</b><span>Left</span></div>
+    <div class="stat" id="sMen"><b>–</b><span>For men</span></div>
+    <div class="stat" id="sWomen"><b>–</b><span>For women</span></div>
+  </div>
+
+  <h2>Guest list</h2>
+  <div class="panel">
+    <p class="muted" id="rsvpStats">Loading…</p>
+    <ul id="rsvps"></ul>
+    <p class="rmsg" id="rsvpMsg"></p>
+  </div>
+
+  <h2>Invite text</h2>
+  <div class="panel">
+    <label for="inviteText">What guests read on the invite (the date, time, and address are shown separately)</label>
+    <textarea id="inviteText"></textarea>
+    <div class="btnrow"><button type="button" id="inviteSave">Save invite text</button></div>
+    <p class="rmsg" id="inviteMsg"></p>
+  </div>
+
+  <h2>Run of show</h2>
+  <div class="panel">
+    <p class="muted">Every timed announcement and activity for saints someone holds.</p>
+    <ul class="show" id="showTimed"></ul>
+    <h3 class="eyebrow" style="margin-top:16px">Loose timing</h3>
+    <ul class="show loose" id="showLoose"></ul>
+  </div>
+
+  <h2>Find lists</h2>
+  <div class="panel">
+    <p class="muted" id="findsState">Loading…</p>
+    <div class="btnrow"><button type="button" id="findsToggle" disabled>Release Find lists</button></div>
+    <p class="rmsg" id="findsMsg"></p>
+  </div>
+
+  <h2>Reminder email</h2>
+  <div class="panel">
+    <p class="muted" id="remStats">Loading…</p>
+    <label for="remSubject">Subject</label>
+    <input type="text" id="remSubject" maxlength="200">
+    <label for="remDetails">Party details and house rules (fill in your date and address). Each Guest’s saint goes above this.</label>
+    <textarea id="remDetails" maxlength="4000"></textarea>
+    <label for="remReplyTo">Replies go to</label>
+    <input type="email" id="remReplyTo" maxlength="200" placeholder="Where guests' replies go">
+    <div class="btnrow"><button type="button" id="remSave">Save email</button></div>
+    <label for="remTestTo">Send a test to</label>
+    <input type="email" id="remTestTo" maxlength="200" placeholder="you@example.com">
+    <div class="btnrow"><button type="button" class="quiet" id="remTest">Send me a test</button></div>
+    <label for="remAt">Send it at (your phone’s time)</label>
+    <input type="datetime-local" id="remAt">
+    <div class="btnrow">
+      <button type="button" id="remSchedule">Schedule</button>
+      <button type="button" class="quiet" id="remUnschedule">Cancel schedule</button>
+    </div>
+    <div class="btnrow"><button type="button" class="danger" id="remNow">Send to everyone now</button></div>
+    <p class="rmsg" id="remMsg"></p>
+  </div>
+
+  <h2>Drinks crew</h2>
+  <div class="panel"><ul id="drinks"></ul></div>
+
+  <h2>Sheet import</h2>
+  <div class="panel">
+    <p class="muted" id="sheetStats">Loading…</p>
+    <ul id="sheetConflicts"></ul>
+  </div>
+
+  <h2>All saints</h2>
+  <p class="muted" style="margin:-4px 0 10px">Each taken saint shows who has it. Edits show up on a Guest’s card the next time it loads.</p>
+  <div class="btnrow"><button type="button" id="saintAdd">Add a saint</button></div>
+  <p class="rmsg ok" id="listMsg"></p>
+
+  <div class="panel" id="editor" hidden>
+    <p class="muted" id="editorTitle"></p>
+    <label for="eName">Name</label>
+    <input type="text" id="eName" maxlength="120">
+    <div class="two">
+      <div><label for="eGender">Who it’s for</label>
+        <select id="eGender"><option value="">Pick one</option><option value="Male">Men</option><option value="Female">Women</option><option value="Either">Anyone</option></select></div>
+      <div><label for="eLevel">Level</label>
+        <select id="eLevel"><option value="">Pick one</option><option>Easy</option><option>Medium</option><option>Extra difficult</option></select></div>
+    </div>
+    <label for="ePatron">Patron of</label>
+    <input type="text" id="ePatron" maxlength="1000">
+    <label for="eCostume">Costume</label>
+    <textarea id="eCostume" maxlength="1000"></textarea>
+    <div class="two">
+      <div><label for="eFind1">Find 1</label><select id="eFind1"></select></div>
+      <div><label for="eFind2">Find 2</label><select id="eFind2"></select></div>
+    </div>
+    <label for="eAnnounce">Announcement (Extra difficult)</label>
+    <textarea id="eAnnounce" maxlength="1000"></textarea>
+    <label for="eAnnounceTime">Announcement time</label>
+    <input type="text" id="eAnnounceTime" maxlength="40" placeholder="9:45 PM">
+    <label for="eActivity">Activity</label>
+    <textarea id="eActivity" maxlength="1000"></textarea>
+    <label for="eActivityTime">Activity time</label>
+    <input type="text" id="eActivityTime" maxlength="40" placeholder="10 PM">
+    <div class="two">
+      <div><label for="ePalette">Palette</label><select id="ePalette"></select></div>
+      <div><label for="eIcon">Icon</label><select id="eIcon"></select></div>
+    </div>
+    <div class="preview" id="ePreview"><div class="medal" id="ePreviewIcon"></div><div><b id="ePreviewName"></b><span id="ePreviewPatron"></span></div></div>
+    <label class="check"><input type="checkbox" id="eDrinks"> Drinks duty</label>
+    <label class="check"><input type="checkbox" id="eParked"> Parked (never handed out, not in spots left)</label>
+    <div class="btnrow">
+      <button type="button" id="saintSave">Save saint</button>
+      <button type="button" class="quiet" id="saintCancel">Cancel</button>
+      <button type="button" class="danger" id="saintDelete">Delete saint</button>
+    </div>
+    <p class="rmsg" id="editorMsg"></p>
+  </div>
+
+  <p class="muted" id="loading">Loading…</p>
+  <ul id="list"></ul>
+</main>
+
+<script>
+  var KEY = new URLSearchParams(location.search).get('key') || '';
+  var $ = function (id) { return document.getElementById(id); };
+  var label = { Male: 'Men', Female: 'Women', Either: 'Anyone' };
+
+  function call(action, args) {
+    args = Object.assign({ key: KEY }, args);
+    return fetch('/api/' + action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(args)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) throw new Error(body.error || 'Something went wrong. Try again.');
+        return body;
+      });
+    });
+  }
+
+  var LOW_SPOTS = 2; // a count this low or lower shows in red
+
+  function stat(id, n) {
+    $(id).querySelector('b').textContent = n;
+    $(id).classList.toggle('low', n <= LOW_SPOTS);
+  }
+
+  /** One saint as a list row: its name, a detail line, and Taken, Parked or Free. */
+  function saintRow(x, detail) {
+    var li = document.createElement('li');
+    var left = document.createElement('div');
+    var n = document.createElement('div'); n.className = 'n'; n.textContent = x.name;
+    var g = document.createElement('div'); g.className = 'g'; g.textContent = detail;
+    left.appendChild(n); left.appendChild(g);
+    var pill = document.createElement('span'); pill.className = 'pill';
+    pill.textContent = x.taken ? 'Taken' : x.parked ? 'Parked' : 'Free';
+    li.appendChild(left); li.appendChild(pill);
+    return li;
+  }
+
+  function render(s) {
+    stat('sLeft', s.counts.left);
+    stat('sMen', s.counts.maleLeft);
+    stat('sWomen', s.counts.femaleLeft);
+    $('loading').hidden = true;
+    saints = s.saints;
+    renderRsvps(s);
+    renderShow(s.runOfShow);
+    renderFinds(s);
+    renderReminder(s.reminder);
+    renderSheetImport(s.sheetImport);
+    var dl = $('drinks'); dl.textContent = '';
+    s.saints.filter(function (x) { return x.drinks; }).forEach(function (x) {
+      dl.appendChild(saintRow(x, x.guest || 'Nobody yet'));
+    });
+    var list = $('list');
+    list.textContent = '';
+    // Free ones first, newest additions at the top of each group.
+    var items = s.saints.map(function (x, i) { return { x: x, i: i }; });
+    items.sort(function (a, b) { return (a.x.taken - b.x.taken) || (b.i - a.i); });
+    items.forEach(function (it) {
+      var x = it.x;
+      var li = saintRow(x, (x.guest ? x.guest + ' \u00b7 ' : '') + (label[x.gender] || x.gender) + ' \u00b7 ' + x.level +
+        (s.released && x.findList.length ? ' \u00b7 finds ' + x.findList.map(saintName).join(' and ') : ''));
+      if (x.taken) li.className = 'taken';
+      else if (x.parked) li.className = 'parked';
+      var acts = document.createElement('div'); acts.className = 'acts';
+      var park = document.createElement('button'); park.type = 'button'; park.className = 'edit quiet';
+      park.textContent = x.parked ? 'Unpark' : 'Park';
+      park.addEventListener('click', function () { setParked(x, !x.parked, park); });
+      var edit = document.createElement('button'); edit.type = 'button'; edit.className = 'edit quiet'; edit.textContent = 'Edit';
+      edit.addEventListener('click', function () { openEditor(x); });
+      acts.appendChild(park); acts.appendChild(edit);
+      if (x.taken) {
+        acts.appendChild(twoTaps('free ' + x.id + ' ' + x.guestId, 'Free saint', 'Tap again to free', function () {
+          return call('freeSaint', { id: x.id, guestId: x.guestId, sure: true })
+            .then(rowDone($('listMsg'), 'Freed ' + x.name + '. It\u2019s back in the pool, and ' + x.guest + ' can get a new saint.'));
+        }, $('listMsg')));
+      }
+      acts.appendChild(li.lastChild);
+      li.appendChild(acts);
+      list.appendChild(li);
+    });
+  }
+
+  // The row button armed by a first tap: its key, and the button. Rows are
+  // rebuilt on every refresh, so the key keeps the new button armed.
+  var armed = { key: null, btn: null };
+
+  /**
+   * A row button that takes two taps: the first only arms it, the second
+   * runs act, which returns the call's promise. key names what the button
+   * acts on, so a refresh that changes it disarms the button. Arming one
+   * button disarms any other. A failed call shows in msg.
+   */
+  function twoTaps(key, text, armedText, act, msg) {
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'edit danger';
+    btn.textContent = armed.key === key ? armedText : text;
+    if (armed.key === key) armed.btn = btn;
+    btn.addEventListener('click', function () {
+      if (armed.key !== key) {
+        if (armed.btn) armed.btn.textContent = armed.btn.dataset.text;
+        armed = { key: key, btn: btn }; btn.textContent = armedText;
+        return;
+      }
+      armed = { key: null, btn: null };
+      btn.disabled = true;
+      act().catch(function (e) {
+        btn.disabled = false; btn.textContent = text;
+        msg.className = 'rmsg bad'; msg.textContent = (e && e.message) || 'Could not save.';
+      });
+    });
+    btn.dataset.text = text;
+    return btn;
+  }
+  function rowDone(msg, text) {
+    return function (st) { render(st); msg.className = 'rmsg ok'; msg.textContent = text; };
+  }
+
+  /* ---------- Saint editor ---------- */
+  var saints = [];
+  var CARDS = { palettes: {}, icons: {} };
+  var editing = null; // the saint being edited, or {} when adding one
+  var deleteArmed = false;
+  var TEXT = { eName: 'name', ePatron: 'patron', eCostume: 'costume', eAnnounce: 'announce',
+    eAnnounceTime: 'announceTime', eActivity: 'activity', eActivityTime: 'activityTime' };
+
+  function options(sel, list, value) {
+    sel.textContent = '';
+    list.forEach(function (o) {
+      var opt = document.createElement('option'); opt.value = o[0]; opt.textContent = o[1];
+      sel.appendChild(opt);
+    });
+    sel.value = value;
+  }
+
+  /** Every editable field of a saint from the host state, as saveSaint takes it. */
+  function saintArgs(x) {
+    var args = { id: x.id, gender: x.gender, level: x.level, find1: x.find1, find2: x.find2,
+      palette: x.palette, icon: x.icon, drinks: x.drinks, parked: x.parked };
+    Object.keys(TEXT).forEach(function (id) { args[TEXT[id]] = x[TEXT[id]]; });
+    return args;
+  }
+
+  /** The Parked switch on each saint's row. */
+  function setParked(x, parked, btn) {
+    btn.disabled = true;
+    call('saveSaint', Object.assign(saintArgs(x), { parked: parked })).then(function (st) {
+      render(st); $('listMsg').className = 'rmsg ok';
+      $('listMsg').textContent = (parked ? 'Parked ' : 'Unparked ') + x.name + '.';
+    }).catch(function (e) {
+      btn.disabled = false; $('listMsg').className = 'rmsg bad';
+      $('listMsg').textContent = (e && e.message) || 'Could not save.';
+    });
+  }
+
+  function openEditor(x) {
+    editing = x;
+    var adding = x.id == null;
+    $('editorTitle').textContent = adding ? 'Add a saint. It can be handed out as soon as you save it.'
+      : x.taken ? x.guest + ' holds this saint. Your edits show on their card the next time it loads.' : 'Edit this saint.';
+    Object.keys(TEXT).forEach(function (id) { $(id).value = x[TEXT[id]] || ''; });
+    $('eGender').value = x.gender || '';
+    $('eLevel').value = x.level || '';
+    var others = [['', 'None']].concat(saints.filter(function (o) { return o.id !== x.id; })
+      .map(function (o) { return [String(o.id), o.name + (o.patron ? ' (patron of ' + o.patron + ')' : '')]; }));
+    options($('eFind1'), others, x.find1 == null ? '' : String(x.find1));
+    options($('eFind2'), others, x.find2 == null ? '' : String(x.find2));
+    options($('ePalette'), Object.keys(CARDS.palettes).map(function (k) { return [k, k]; }), x.palette || 'gold');
+    options($('eIcon'), Object.keys(CARDS.icons).map(function (k) { return [k, k]; }), x.icon || 'sparkles');
+    $('eDrinks').checked = !!x.drinks;
+    $('eParked').checked = !!x.parked;
+    $('saintDelete').hidden = adding;
+    $('saintDelete').disabled = !!x.taken;
+    disarmDelete();
+    var noCards = !Object.keys(CARDS.palettes).length;
+    $('editorMsg').textContent = noCards ? 'The card designs didn\u2019t load, so palettes and icons can\u2019t be picked. Reload the page.' : '';
+    $('editorMsg').className = 'rmsg bad';
+    $('saintSave').disabled = noCards;
+    $('editor').hidden = false;
+    preview();
+    $('editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function closeEditor() { editing = null; $('editor').hidden = true; }
+
+  function disarmDelete() {
+    deleteArmed = false;
+    $('saintDelete').textContent = editing && editing.taken ? 'Free this saint before deleting it' : 'Delete saint';
+  }
+
+  /** The card preview, in the picked palette and icon. */
+  function preview() {
+    var p = CARDS.palettes[$('ePalette').value] || CARDS.palettes.gold || ['#fbf6ea', '#2a2233', '#b9862c'];
+    $('ePreview').style.background = p[0];
+    $('ePreview').style.color = p[1];
+    $('ePreviewIcon').style.color = p[2];
+    $('ePreviewIcon').innerHTML = CARDS.icons[$('eIcon').value] || '';
+    $('ePreviewName').textContent = $('eName').value || 'New saint';
+    $('ePreviewPatron').textContent = $('ePatron').value ? 'Patron of ' + $('ePatron').value : '';
+  }
+  ['ePalette', 'eIcon'].forEach(function (id) { $(id).addEventListener('change', preview); });
+  ['eName', 'ePatron'].forEach(function (id) { $(id).addEventListener('input', preview); });
+
+  function editorDone(msg) {
+    return function (st) { closeEditor(); render(st); $('listMsg').className = 'rmsg ok'; $('listMsg').textContent = msg; };
+  }
+  function editorFailed(e) {
+    $('editorMsg').textContent = (e && e.message) || 'Could not save.'; $('editorMsg').className = 'rmsg bad';
+  }
+
+  $('saintAdd').addEventListener('click', function () { openEditor({}); });
+  $('saintCancel').addEventListener('click', closeEditor);
+  $('saintSave').addEventListener('click', function () {
+    var args = { id: editing.id, gender: $('eGender').value, level: $('eLevel').value,
+      find1: $('eFind1').value ? Number($('eFind1').value) : null,
+      find2: $('eFind2').value ? Number($('eFind2').value) : null,
+      palette: $('ePalette').value, icon: $('eIcon').value,
+      drinks: $('eDrinks').checked, parked: $('eParked').checked };
+    Object.keys(TEXT).forEach(function (id) { args[TEXT[id]] = $(id).value; });
+    $('saintSave').disabled = true;
+    call('saveSaint', args).then(editorDone('Saved ' + args.name.trim() + '.')).catch(editorFailed)
+      .then(function () { $('saintSave').disabled = false; });
+  });
+  // Deleting takes two taps.
+  $('saintDelete').addEventListener('click', function () {
+    if (!deleteArmed) { deleteArmed = true; $('saintDelete').textContent = 'Tap again to delete'; return; }
+    var name = editing.name;
+    call('deleteSaint', { id: editing.id }).then(editorDone('Deleted ' + name + '.'))
+      .catch(function (e) { disarmDelete(); editorFailed(e); });
+  });
+
+  /** One Run of show list. Set times get their own column; loose timing goes beside the Guest. */
+  function showList(ul, rows, emptyText, setTimes) {
+    ul.textContent = '';
+    if (!rows.length) {
+      var none = document.createElement('li'); none.className = 'g'; none.textContent = emptyText;
+      ul.appendChild(none);
+    }
+    rows.forEach(function (r) {
+      var li = document.createElement('li');
+      var body = document.createElement('div');
+      var n = document.createElement('div'); n.className = 'n'; n.textContent = r.saint + ' \u00b7 ' + r.what;
+      var g = document.createElement('div'); g.className = 'g'; g.textContent = setTimes ? r.guest : r.when + ' \u00b7 ' + r.guest;
+      var d = document.createElement('div'); d.className = 'd'; d.textContent = r.details;
+      if (setTimes) {
+        var t = document.createElement('div'); t.className = 't'; t.textContent = r.when;
+        li.appendChild(t);
+      }
+      body.appendChild(n); body.appendChild(g); body.appendChild(d);
+      li.appendChild(body); ul.appendChild(li);
+    });
+  }
+
+  function renderShow(show) {
+    showList($('showTimed'), show.timed, 'No set times yet. They show up once someone holds a saint with one.', true);
+    showList($('showLoose'), show.loose, 'Nothing with loose timing yet.', false);
+  }
+
+  /* ---------- Find lists ---------- */
+  var released = false;
+
+  var findsSaving = false; // the 15-second refresh leaves the button alone while a tap is saving
+
+  function saintName(id) {
+    for (var i = 0; i < saints.length; i++) if (saints[i].id === id) return saints[i].name;
+    return '';
+  }
+
+  function renderFinds(s) {
+    if (findsSaving) return;
+    released = s.released;
+    $('findsState').textContent = released
+      ? 'Released. Every Guest with a saint sees two saints to find. Lists fix themselves when someone gives a saint back.'
+      : 'Not released yet. Cards say the list is coming on party day. Release once most guests have their saints, like the morning of the party.';
+    $('findsToggle').textContent = released ? 'Hide Find lists' : 'Release Find lists';
+    $('findsToggle').disabled = false;
+  }
+  $('findsToggle').addEventListener('click', function () {
+    var on = !released;
+    findsSaving = true; $('findsToggle').disabled = true;
+    call('setFindsReleased', { released: on }).then(function (st) {
+      findsSaving = false; render(st); $('findsMsg').className = 'rmsg ok';
+      $('findsMsg').textContent = on ? 'Find lists released. Guests see them on their next refresh.' : 'Find lists hidden.';
+    }).catch(function (e) {
+      findsSaving = false; $('findsToggle').disabled = false; $('findsMsg').className = 'rmsg bad';
+      $('findsMsg').textContent = (e && e.message) || 'Could not save.';
+    });
+  });
+
+  // The old Apps Script invite is still live; its Sheet is imported every minute.
+  function renderSheetImport(si) {
+    var when = function (iso) { return new Date(iso).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }); };
+    $('sheetStats').textContent = si.at
+      ? 'Guests from the old invite\u2019s Sheet come in every minute. Last import ' + when(si.at) + '.' +
+        (si.conflicts.length ? ' Conflicts to sort out by hand, newest first:' : ' No conflicts.')
+      : 'The old invite\u2019s Sheet hasn\u2019t been imported yet.';
+    var ul = $('sheetConflicts'); ul.textContent = '';
+    si.conflicts.forEach(function (c) {
+      var li = document.createElement('li');
+      li.textContent = when(c.at) + ': ' + c.text;
+      ul.appendChild(li);
+    });
+  }
+
+  var inviteLoaded = false;
+  function renderRsvps(s) {
+    var r = s.guests;
+    var n = function (st) { return r.filter(function (x) { return x.status === st; }).length; };
+    var cant = r.length - n('Going') - n('Maybe');
+    $('rsvpStats').textContent = n('Going') + ' going, ' + n('Maybe') + ' maybe, ' + cant + ' can\u2019t go. ' +
+      s.withoutSaint + ' coming without a saint yet.';
+    var ul = $('rsvps'); ul.textContent = '';
+    r.forEach(function (x) {
+      var li = document.createElement('li');
+      if (x.status !== 'Going' && x.status !== 'Maybe') li.className = 'taken';
+      var left = document.createElement('div');
+      var nm = document.createElement('div'); nm.className = 'n'; nm.textContent = x.name;
+      var sub = document.createElement('div'); sub.className = 'g';
+      sub.textContent = (x.saint || 'No saint yet') + (x.reminderSent ? ' \u00b7 reminder sent' : x.reminder ? ' \u00b7 reminder on' : '');
+      left.appendChild(nm); left.appendChild(sub);
+      var pill = document.createElement('span'); pill.className = 'pill'; pill.textContent = x.status;
+      var acts = document.createElement('div'); acts.className = 'acts';
+      acts.appendChild(twoTaps('remove ' + x.id + ' ' + x.name, 'Remove guest', 'Tap again to remove', function () {
+        return call('removeGuest', { guestId: x.id, name: x.name, sure: true })
+          .then(rowDone($('rsvpMsg'), 'Removed ' + x.name + '.' + (x.saint ? ' ' + x.saint + ' is back in the pool.' : '')));
+      }, $('rsvpMsg')));
+      acts.appendChild(pill);
+      li.appendChild(left); li.appendChild(acts); ul.appendChild(li);
+    });
+    if (!inviteLoaded) { $('inviteText').value = s.invite; inviteLoaded = true; }
+  }
+  $('inviteSave').addEventListener('click', function () {
+    $('inviteSave').disabled = true;
+    call('saveInvite', { text: $('inviteText').value }).then(function (st) {
+      $('inviteText').value = st.invite;
+      render(st); $('inviteMsg').textContent = 'Saved. Guests see it on their next refresh.'; $('inviteMsg').className = 'rmsg ok';
+    }).catch(function (e) {
+      $('inviteMsg').textContent = (e && e.message) || 'Could not save.'; $('inviteMsg').className = 'rmsg bad';
+    }).then(function () { $('inviteSave').disabled = false; });
+  });
+
+  /* ---------- Reminder email ---------- */
+  var reminderLoaded = false; // the 15-second refresh leaves the Host's typing alone
+  var sendArmed = null; // the timer that disarms Send to everyone now
+  var sendingPoll = null; // while a send runs, the page checks on it every few seconds
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  /** An ISO time as the value of a datetime-local input, in this phone's time. */
+  function datetimeLocalValue(iso) {
+    var d = new Date(iso);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function renderReminder(r) {
+    $('remStats').textContent = r.signedUp + (r.signedUp === 1 ? ' Guest' : ' Guests') + ' signed up (Going or Maybe), ' +
+      r.sent + ' sent. ' + (r.scheduledFor
+        ? 'Scheduled for ' + new Date(r.scheduledFor).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '.'
+        : 'Not scheduled.') +
+      (r.sending ? ' Sending now\u2026' : '') +
+      (r.failed ? ' ' + r.failed + ' failed in the last send. ' + (r.scheduledFor
+        ? 'The schedule tries them again every minute.'
+        : 'Tap Send to everyone now to try them again.') : '');
+    clearTimeout(sendingPoll);
+    if (r.sending) sendingPoll = setTimeout(refresh, 2000);
+    if (!reminderLoaded) {
+      $('remSubject').value = r.subject; $('remDetails').value = r.details;
+      $('remReplyTo').value = r.replyTo; $('remTestTo').value = r.testTo;
+      if (r.scheduledFor) $('remAt').value = datetimeLocalValue(r.scheduledFor);
+      reminderLoaded = true;
+    }
+  }
+
+  function remSay(ok, text) { $('remMsg').className = 'rmsg ' + (ok ? 'ok' : 'bad'); $('remMsg').textContent = text; }
+
+  /** Save the subject, details and Reply-To, then run next (if any) with the saved state. */
+  function saveReminderThen(btn, next) {
+    btn.disabled = true;
+    return call('saveReminder', { subject: $('remSubject').value, details: $('remDetails').value, replyTo: $('remReplyTo').value })
+      .then(function (st) {
+        $('remSubject').value = st.reminder.subject; $('remDetails').value = st.reminder.details;
+        render(st);
+        return next ? next() : st;
+      })
+      .catch(function (e) { remSay(false, (e && e.message) || 'Could not save.'); return null; })
+      .then(function (st) { btn.disabled = false; return st; });
+  }
+
+  $('remSave').addEventListener('click', function () {
+    saveReminderThen($('remSave')).then(function (st) { if (st) remSay(true, 'Saved.'); });
+  });
+  $('remTest').addEventListener('click', function () {
+    saveReminderThen($('remTest'), function () {
+      return call('sendTestReminder', { to: $('remTestTo').value }).then(function (st) {
+        render(st); remSay(true, 'Test sent to ' + st.testSentTo + '. It shows the first Guest with a saint.');
+        return st;
+      });
+    });
+  });
+  $('remSchedule').addEventListener('click', function () {
+    var when = $('remAt').value;
+    if (!when) { remSay(false, 'Pick a date and time first.'); return; }
+    saveReminderThen($('remSchedule'), function () {
+      return call('scheduleReminder', { at: new Date(when).toISOString() }).then(function (st) {
+        render(st); remSay(true, 'Scheduled. It goes to every Going and Maybe Guest not sent it yet.');
+        return st;
+      });
+    });
+  });
+  $('remUnschedule').addEventListener('click', function () {
+    call('scheduleReminder', { at: '' }).then(function (st) {
+      render(st); $('remAt').value = ''; remSay(true, 'Schedule cancelled.');
+    }).catch(function (e) { remSay(false, (e && e.message) || 'Could not cancel.'); });
+  });
+  function disarmSend() { clearTimeout(sendArmed); sendArmed = null; $('remNow').textContent = 'Send to everyone now'; }
+  // Sending to everyone takes two taps.
+  $('remNow').addEventListener('click', function () {
+    if (!sendArmed) {
+      $('remNow').textContent = 'Tap again to send now';
+      sendArmed = setTimeout(disarmSend, 5000);
+      return;
+    }
+    disarmSend();
+    saveReminderThen($('remNow'), function () {
+      return call('sendRemindersNow').then(function (st) {
+        render(st);
+        remSay(true, 'Sending to every Going and Maybe Guest not sent it yet. The count above goes up as they go out.');
+        return st;
+      });
+    });
+  });
+
+  function refresh() {
+    call('getHostState').then(render).catch(function (e) {
+      $('loading').hidden = false;
+      $('loading').textContent = (e && e.message) || 'Could not load the list.';
+    });
+  }
+  // The editor's pickers need the card designs, so the first render waits for them.
+  fetch('/cards.json')
+    .then(function (res) { return res.json(); })
+    .then(function (c) { CARDS = c; })
+    .catch(function () {})
+    .then(function () { refresh(); });
+  setInterval(function () { if (!document.hidden) refresh(); }, 15000);
+</script>
+</body>
+</html>
