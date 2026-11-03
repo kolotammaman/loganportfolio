@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Pilgrim Fares (demo)</title>
+<meta name="description" content="A demo of a flight-deal tracker for Catholic pilgrimage destinations that favors trips timed to a feast day.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/demos/demo.css">
+</head>
+<body>
+<header class="top"><div class="in"><a href="/#built">&larr; Logan Moseley</a><a href="/#built">Things I&rsquo;ve built</a></div></header>
+<main class="wrap">
+  <h1>Pilgrim Fares</h1>
+  <p class="lede">A flight-deal tracker for Catholic pilgrimage sites. Watch destinations like Fatima, Lourdes, and the Holy Land, and it ranks fares by how far under the usual price they are, how many stops they have, the airline, and whether the trip lands on a feast day. The real version checks live fares every day and emails an alert. I built it for my dad, who is its only user.</p>
+  <p class="note"><b>Demo.</b> The fares below are generated sample data, so none of them can be booked. The scoring rule and the feast-day dates (including movable feasts like Easter and Divine Mercy Sunday) are computed the way the app does it. Nothing you click leaves your browser.</p>
+  <section class="panel" aria-labelledby="l-o"><span class="lab" id="l-o">Fly from</span><div class="chips" id="origin"></div></section>
+  <section class="panel" aria-labelledby="l-w"><span class="lab" id="l-w">Watchlist</span><div class="chips" id="watch"></div></section>
+  <section class="panel" aria-labelledby="l-f"><span class="lab" id="l-f">Filter</span>
+    <div class="filters">
+      <div class="grp"><label class="lab" for="disc">Minimum discount</label><input type="range" id="disc" min="10" max="60" step="5" value="25"><div class="badge best" id="discout">25% or more</div></div>
+      <div class="grp"><span class="lab">Flight type</span>
+        <label class="chk"><input type="checkbox" id="nonstop"> Nonstop only</label>
+        <label class="chk"><input type="checkbox" id="nobudget"> Skip budget carriers</label></div>
+    </div>
+  </section>
+  <p class="count" id="count" aria-live="polite"></p>
+  <div class="res" id="res"></div>
+  <section class="panel" aria-labelledby="l-c"><span class="lab" id="l-c">Upcoming feast days on your watchlist</span><div id="cal"></div></section>
+  <p class="foot">Scoring: 50% how far under the usual fare, 20% stops, 15% airline type, 15% feast-day timing. A feast inside the trip dates counts fully, and one within a week of either end counts half.</p>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

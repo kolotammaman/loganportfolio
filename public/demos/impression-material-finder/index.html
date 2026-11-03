@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Impression Material Finder (prototype)</title>
+<meta name="description" content="A working prototype that ranks dental impression materials, burs, and cements by what matters for a case.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/demos/demo.css">
+</head>
+<body>
+<header class="top"><div class="in"><a href="/#built">&larr; Logan Moseley</a><a href="/#built">Things I&rsquo;ve built</a></div></header>
+<main class="wrap">
+  <h1>Impression Material Finder</h1>
+  <p class="lede">Pick what matters most for the case. The tool ranks hundreds of dental impression materials, burs, and cements by those priorities and lets you filter by manufacturer, type, and set time. I built it with our prosthodontics clinic&rsquo;s dental assistant to replace a lot of spec-sheet hunting.</p>
+  <p class="note"><b>Prototype.</b> This is a public copy running on a sample catalog in your browser. Specs are representative of published manufacturer data, so confirm against the technical data sheet before ordering. Prices are list estimates and any you edit here are not saved.</p>
+  <div class="tabs" role="tablist" aria-label="Category" id="tabs"></div>
+  <section class="panel" aria-labelledby="l-pri"><span class="lab" id="l-pri">What matters most for this case?</span><div class="chips" id="pri"></div><p class="count" id="prihelp"></p></section>
+  <section class="panel" aria-labelledby="l-fil"><span class="lab" id="l-fil">Filter</span><div class="filters" id="filters"></div></section>
+  <p class="count" id="count" aria-live="polite"></p>
+  <div class="res" id="res"></div>
+  <p class="foot">How the ranking works: each priority you pick is scored 0 to 100 against the products currently showing, then blended with the first pick weighted most. The best product for a priority always scores 100 on it, so the list reshuffles as you filter.</p>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
