@@ -32,7 +32,7 @@ const ogImage = new URL('/og-image.jpg', Astro.site).href;
     <link rel="preload" href="/fonts/SortsMillGoudy-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Logan Moseley | Project & Program Operations" />
+    <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />

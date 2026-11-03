@@ -275,11 +275,16 @@ a.row:hover .row-arrow { transform: translate(.2rem, -.2rem); }
 @media (max-width: 760px) { .results { grid-template-columns: 1fr; } }
 
 /* ── Stat strip ── */
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-.stat { padding: 1.1rem 0; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.stat { padding: 1.1rem 0; display: flex; flex-direction: column; justify-content: space-between; gap: .9rem; }
 .stat + .stat { padding-left: 1.25rem; border-left: 1px solid var(--rule); }
-.stat b { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.2rem); letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat b { display: block; white-space: nowrap; font-family: var(--display); font-weight: 700; font-size: clamp(1.9rem, 1rem + 2.4vw, 3.3rem); letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 .stat span { display: block; margin-top: .4rem; }
+@media (max-width: 900px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stat:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--rule); }
+}
 
 /* ── Skills ── */
 .skills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 clamp(1.25rem, 3vw, 2.5rem); }

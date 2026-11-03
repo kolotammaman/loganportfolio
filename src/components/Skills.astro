@@ -1,9 +1,9 @@
 ---
 const groups = [
-  { title: 'Operations & management', skills: ['Project/program management', 'Training logistics', 'Vendor coordination', 'Version control', 'Process optimization', 'Event production', 'Cross-specialty training'] },
-  { title: 'Communication', skills: ['Client/trainer liaison', 'Cross-team coordination', 'De-escalation', 'Onboarding & training', 'Status reporting'] },
-  { title: 'Software & tools', skills: ['Advanced PowerPoint', 'Excel tracking', 'Google Workspace', 'Slack / Asana / Airtable', 'Adobe Illustrator & Photoshop', 'Axium'] },
-  { title: 'Quick learner', skills: ['Workday', 'Concur', 'Ben Buys / purchase orders', 'OnFleet', 'Inventory systems'] },
+  { title: 'Operations', skills: ['Instrument and inventory tracking', 'Purchasing, vendor payments, and repair claims', 'Sourcing and substitutions', 'SOPs and checklists', 'Training and onboarding', 'Dispatch and routing', 'Event planning'] },
+  { title: 'Software', skills: ['Excel', 'Google Workspace', 'PowerPoint', 'Slack', 'Asana', 'Airtable', 'OnFleet', 'Axium', 'BEN Buys', 'Illustrator', 'Photoshop'] },
+  { title: 'Building with AI', skills: ['Claude Code', 'GitHub', 'Next.js', 'Supabase', 'Node', 'SQLite', 'Google Apps Script', 'Vercel', 'Fly.io'] },
+  { title: 'Also', skills: ['Have used Workday and Concur', 'Studying Arabic, German, and Spanish (beginner)'] },
 ];
 ---
 
@@ -11,12 +11,12 @@ const groups = [
   <div class="wrap sec-grid">
     <div class="sec-head"><span class="label"><span class="num">05</span>Skills</span></div>
     <div class="sec-body reveal">
-      <h2 id="skills-h">My <em>toolkit.</em></h2>
+      <h2 id="skills-h">Skills and tools</h2>
       <div class="skills">
         {groups.map((g) => (
           <div class="skill-group">
             <h3>{g.title}</h3>
-            <p>{g.skills.map((s, i) => (<Fragment>{i > 0 && <i>/</i>}{s}</Fragment>))}</p>
+            <p>{g.skills.map((s, i) => (<Fragment>{i > 0 && <Fragment><i>/</i><wbr /></Fragment>}{s}</Fragment>))}</p>
           </div>
         ))}
       </div>

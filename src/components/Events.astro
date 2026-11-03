@@ -1,57 +1,71 @@
 ---
-// Each piece lives as its own self-contained page under /events/.
+// Each linked piece lives as its own self-contained page under /events/.
 const pieces = [
   {
-    title: 'Saint Party',
-    href: '/events/saint-party/',
-    kind: 'Working demo',
-    desc: "RSVP and saint-assignment web app for a 30 to 60 guest All Saints' Eve party. Every guest gets a saint to dress as and a mission for the night. No saint goes to two people, and the demo runs entirely in your browser.",
+    title: 'Murder mystery fundraiser',
+    kind: 'Sold out',
+    desc: 'Sold out with over 100 paying guests and raised $1,200. I wrote the script from scratch, came up with nine characters, did the stage design and lighting, helped each actor figure out their costume, and booked a live jazz band and made sure they got paid. I also handled the marketing, tickets, and volunteers. I&rsquo;m helping plan the next one for January 2027.',
   },
   {
     title: 'Iron Dip',
     href: '/events/iron-dip/scorecard.pdf',
     kind: 'Scorecard, PDF',
-    desc: "An Iron Chef-style dip cook-off: six teams, 40 minutes, two mystery ingredients at halftime, three judges, and a curtain reveal. The judges' scorecard is linked here, with the host script below.",
+    desc: 'An Iron Chef-style dip cook-off for six teams. Captains draft their dips through a rock-paper-scissors bracket, and two mystery ingredients get drawn with 20 minutes left. Three judges score five categories, and flavor breaks ties. I also wrote the host script and a parody hype video.',
   },
   {
     title: 'Easter Sunday Party',
     href: '/events/easter-flyer/',
     kind: 'Flyer',
-    desc: "Flyer for the Catholic men's group at St. Agatha-St. James: snacks, games, and music after the luncheon that follows 11:30 Mass.",
+    desc: 'Flyer for the men&rsquo;s group&rsquo;s open house after the parish luncheon that follows 11:30 Mass: snacks, board games, and music until about 5.',
   },
   {
-    title: 'Catechism, one page',
+    title: 'The Catechism on one page',
     href: '/events/catechism/',
     kind: 'Print reference',
-    desc: 'The Catechism of the Catholic Church mapped on a single letter-size page, with paragraph ranges checked against its structure.',
+    desc: 'The whole Catechism of the Catholic Church mapped onto one letter-size page. I checked every paragraph range against the actual text and fixed the ones that were wrong, like the Ten Commandments starting at paragraph 2052.',
   },
 ];
 ---
 
 <section id="events" class="sec" aria-labelledby="events-h">
   <div class="wrap sec-grid">
-    <div class="sec-head"><span class="label"><span class="num">04</span>Events &amp; faith</span></div>
+    <div class="sec-head"><span class="label"><span class="num">04</span>Events</span></div>
     <div class="sec-body reveal">
-      <h2 id="events-h">Programs for <em>people, in person.</em></h2>
+      <h2 id="events-h">Events I&rsquo;ve run</h2>
+      <p class="prose">
+        Most of these were for the young adults and men&rsquo;s groups at my parish. I usually end up doing the whole
+        thing, from the plan to the printed materials.
+      </p>
       <div class="rows">
-        {pieces.map((p, i) => (
-          <a class="row" href={p.href} target="_blank" rel="noopener">
-            <span class="row-no">{String(i + 1).padStart(2, '0')}</span>
-            <span>
-              <span class="row-title">{p.title}</span>
-              <span class="row-desc">{p.desc}</span>
-            </span>
-            <span class="row-meta">
-              <span class="label">{p.kind}</span><br />
-              <span class="row-arrow" aria-hidden="true">&nearr;</span>
-            </span>
-          </a>
-        ))}
+        {pieces.map((p, i) => {
+          const inner = (
+            <Fragment>
+              <span class="row-no">{String(i + 1).padStart(2, '0')}</span>
+              <span>
+                <span class="row-title">{p.title}</span>
+                <span class="row-desc" set:html={p.desc} />
+              </span>
+              <span class="row-meta">
+                <span class="label">{p.kind}</span>
+                {p.href && (<Fragment><br /><span class="row-arrow" aria-hidden="true">&nearr;</span></Fragment>)}
+              </span>
+            </Fragment>
+          );
+          return p.href ? (
+            <a class="row" href={p.href} target="_blank" rel="noopener">{inner}</a>
+          ) : (
+            <div class="row">{inner}</div>
+          );
+        })}
       </div>
+      <p class="prose">
+        Also: signs and print materials for an electronic music night, a quick-reference guide and QR flyer for a
+        volunteer day, and a parish listening session on communion and belonging on November 8.
+      </p>
       <p class="label muted">
         Iron Dip host script:
-        <a href="/events/iron-dip/host-script.pdf" target="_blank" rel="noopener"><u>open PDF</u></a>
-        &nbsp;/&nbsp; The Saint Party demo is sample data; nothing you enter leaves your device.
+        <a href="/events/iron-dip/host-script.pdf" target="_blank" rel="noopener">open PDF &nearr;</a>
+        &nbsp;/&nbsp; The Saint Party app is under <a href="#built">Things I&rsquo;ve built &nearr;</a>.
       </p>
     </div>
   </div>

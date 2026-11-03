@@ -1,0 +1,63 @@
+---
+// Things built with AI coding tools. Items without an href render as plain rows.
+const builds = [
+  {
+    title: 'Intrepid',
+    href: 'https://alibi.fly.dev/',
+    kind: 'Browser game',
+    desc: 'Snake, but with power-ups, customizable skins, and an endless classy jazz soundtrack that never repeats. It was my idea, and I built and launched the first version myself on Fly.io. A friend who&rsquo;s an engineer joined after launch, added the tests and tooling, and now hosts the main version on his server.',
+  },
+  {
+    title: 'Impression Material Finder',
+    kind: 'Prototype, not public',
+    desc: 'Compares dental impression materials based on how our prosthodontics clinic actually works. I built it with the clinic&rsquo;s dental assistant. The prototype works, and I stopped there.',
+  },
+  {
+    title: 'Saint Party',
+    href: '/events/saint-party/',
+    kind: 'Working demo',
+    desc: 'RSVPs and costume assignments for an All Saints&rsquo; Eve party on October 31, 2026, for 30 to 60 guests. Everyone gets a saint to dress as and two other saints to find during the night, and no saint goes to two people. I load-tested it with 80 fake guests to make sure that held. It started as a Google Sheet and ended up as a small Node and SQLite app. The demo runs the real code in your browser, and nothing you type leaves your device.',
+  },
+  {
+    title: 'Pilgrim Fares',
+    kind: 'Private',
+    desc: 'Flight deal alerts I built for my dad, focused on Catholic pilgrimage sites. Next.js, Supabase, and the Anthropic API. He&rsquo;s the only user.',
+  },
+];
+---
+
+<section id="built" class="sec" aria-labelledby="built-h">
+  <div class="wrap sec-grid">
+    <div class="sec-head"><span class="label"><span class="num">03</span>Built</span></div>
+    <div class="sec-body reveal">
+      <h2 id="built-h">Things I&rsquo;ve built</h2>
+      <p class="prose">
+        I use AI every day, mostly Claude, to build things I couldn&rsquo;t have built a year ago. I come up with the
+        idea and decide how it should work. The AI writes a lot of the code, and I test it and keep going until it
+        actually works. Some of these are finished. A couple I stopped once the prototype worked.
+      </p>
+      <div class="rows">
+        {builds.map((b, i) => {
+          const inner = (
+            <Fragment>
+              <span class="row-no">{String(i + 1).padStart(2, '0')}</span>
+              <span>
+                <span class="row-title">{b.title}</span>
+                <span class="row-desc" set:html={b.desc} />
+              </span>
+              <span class="row-meta">
+                <span class="label">{b.kind}</span>
+                {b.href && (<Fragment><br /><span class="row-arrow" aria-hidden="true">&nearr;</span></Fragment>)}
+              </span>
+            </Fragment>
+          );
+          return b.href ? (
+            <a class="row" href={b.href} target="_blank" rel="noopener">{inner}</a>
+          ) : (
+            <div class="row">{inner}</div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</section>
