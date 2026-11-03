@@ -36,12 +36,12 @@
 }
 
 :root {
-  --paper: #f1eee6;
-  --paper-deep: #e8e4d9;
-  --ink: #131312;
-  --ink-soft: #55524b;
+  --paper: #e8e8e3;
+  --paper-deep: #dcdcd6;
+  --ink: #111111;
+  --ink-soft: #4f4f4b;
   --rule: #131312;
-  --spot: #e0381b;
+  --spot: #2236d6;
 
   --display: 'Sporting Grotesque', 'Helvetica Neue', Arial, sans-serif;
   --text: 'Sorts Mill Goudy', Georgia, 'Times New Roman', serif;
